@@ -1,43 +1,10 @@
 require 'wiringpi'
 
-class SerialPort
-  def initialize
-  end
-end
-
-
-class Player
-  attr_accessor :id
-
-  def initialize(id)
-    @id = id
-  end
-end
-
-
-class Team
-  attr_accessor :id, :score
-
-  def initialize(id)
-    @id = id
-    @score = 0
-    @winner = false
-  end
-
-  def make_winner
-    @winner = true
-  end
-
-  def winner?
-    @winner
-  end
-end
-
-
 class Game
   def initialize
   end
 end
+
 
 
 class Table
@@ -72,16 +39,7 @@ class Table
       register_players
       start_match
       end_match
-      check_pressed INPUT_PINS[:start], :message => 'inizio partita', :sound => GOAL_SOUND, :on => :idle do
-        self.state = STATES[:registration]
-      end
-      check_pressed INPUT_PINS[:goal_a], :message => 'gol squadra a', :sound => GOAL_SOUND, :on => :match do
-        increase_score teams[0]
-      end
-      check_pressed INPUT_PINS[:goal_b], :message => 'gol squadra b', :sound => GOAL_SOUND, :on => :match do
-        increase_score teams[1]
-      end
-      reset_pins
+      check_buttons
       sleep 0.002
     end
   end
@@ -94,9 +52,22 @@ class Table
 
   private
 
+  def check_buttons
+    check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => GOAL_SOUND, :on => :idle do
+      self.state = STATES[:registration]
+    end
+    check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :sound => GOAL_SOUND, :on => :match do
+      increase_score teams[0]
+    end
+    check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :sound => GOAL_SOUND, :on => :match do
+      increase_score teams[1]
+    end
+    reset_pins
+  end
+
   def wait_for_start
     if state_idle? and !@done
-      p "idle - please push start button" 
+      p "idle - please push start button"
       @done = true
     end
   end
@@ -134,7 +105,7 @@ class Table
       team.make_winner
       p "the winner is team #{team.id}"
       self.state = STATES[:end_match]
-    end   
+    end
   end
 
   def start_match
@@ -173,7 +144,7 @@ class Table
   end
 
   def check_pressed(pin, opts)
-    if button_pressed? pin      
+    if button_pressed? pin
       if !opts[:on] or opts[:on] && send("state_#{opts[:on]}?")
         lock
         led :on
