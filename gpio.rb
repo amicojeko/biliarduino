@@ -6,69 +6,46 @@ class SerialPort
   end
 end
 
-
-
 class Player
-  def initialize(args)
-
+  def initialize
   end
-
-
 end
 
 class Team
-  def initialize(args)
-
+  def initialize
   end
-
-
 end
 
 class Game
-  def initialize(args)
-
+  def initialize
   end
-
-
 end
 
 class Table
-
-INPUT_PINS  = {goal_a:0, goal_b:3, start:4}
-OUTPUT_PINS = {led:7}
-GOAL_SOUND = "horn.mp3"
+  INPUT_PINS  = {goal_a: 0, goal_b: 3, start: 4}
+  OUTPUT_PINS = {led: 7}
+  GOAL_SOUND  = "horn.mp3"
 
   def initialize()
-
     @s = WiringPi::Serial.new('/dev/ttyAMA0',9600)
-    @serialBuffer = ""
-
+    @serialBuffer = ''
     @io = WiringPi::GPIO.new(WPI_MODE_PINS)
-    
-
-    @io.mode(INPUT_PINS[:goal_a], INPUT)
-    @io.mode(INPUT_PINS[:goal_b], INPUT)
-    @io.mode(INPUT_PINS[:start], INPUT)
-    @io.mode(OUTPUT_PINS[:led], OUTPUT)
-
+    @io.mode INPUT_PINS[:goal_a], INPUT
+    @io.mode INPUT_PINS[:goal_b], INPUT
+    @io.mode INPUT_PINS[:start], INPUT
+    @io.mode OUTPUT_PINS[:led], OUTPUT
     @lock = false
-    
   end
 
-
-
-
   def mainloop
-
     loop do
       #leggo lo stato degli input
       @buttonstate = @io.readAll
-      #RFID CHECK
 
+      #RFID CHECK
       while (@s.serialDataAvail > 0)
         @serialBuffer += @s.serialGetchar.chr
       end
-
       if @serialBuffer.size > 0
         p @serialBuffer
         @serialBuffer = ""
@@ -79,26 +56,23 @@ GOAL_SOUND = "horn.mp3"
         @lock = true
         led_on
         p "inizio partita"
-        play_sound(GOAL_SOUND)
+        play_sound GOAL_SOUND
       end
-
 
       #GOAL SQUADRA A
       if button_pressed? INPUT_PINS[:goal_a]
         @lock = true
         led_on
         p "gol squadra 1"
-        play_sound(GOAL_SOUND)
+        play_sound GOAL_SOUND
       end
-
-
 
       #GOAL SQUADRA B
       if button_pressed? INPUT_PINS[:goal_b]
         @lock = true
         led_on
         p "gol squadra 2"
-        play_sound(GOAL_SOUND)
+        play_sound GOAL_SOUND
       end
 
       #TUTTI GLI INPUT A RIPOSO
@@ -107,21 +81,18 @@ GOAL_SOUND = "horn.mp3"
         @lock = false
       end
 
-
-
-      sleep(0.002)
+      sleep 0.002
     #LOOP END
     end
-
   #MAINLOOP METHOD END
   end
 
   def led_on
-    led(1)
+    led 1
   end
 
   def led_off
-    led(0)
+    led 0
   end
 
   private
@@ -131,15 +102,12 @@ GOAL_SOUND = "horn.mp3"
   end
 
   def led(state)
-    @io.write(OUTPUT_PINS[:led], state)
+    @io.write OUTPUT_PINS[:led], state
   end
 
   def play_sound(sound)
-    fork{ exec 'mpg123','-q', sound }
+    fork { exec 'mpg123','-q', sound }
   end
-
-
-
 end
 
 
