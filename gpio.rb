@@ -27,10 +27,9 @@ class Table
   GOAL_SOUND  = 'horn.mp3'
 
   def initialize
-    @serialBuffer = ''
-    @serial = WiringPi::Serial.new('/dev/ttyAMA0',9600)
     @io = WiringPi::GPIO.new(WPI_MODE_PINS)
-    start_inputs
+    init_serial
+    init_inputs
     start_outputs
     unlock
   end
@@ -54,6 +53,19 @@ class Table
 
   private
 
+  def init_serial
+    @serial = WiringPi::Serial.new('/dev/ttyAMA0',9600)
+    @serialBuffer = ''
+  end
+
+  def init_inputs
+    INPUT_PINS.values.each { |pin| @io.mode pin, INPUT }
+  end
+
+  def init_outputs
+    OUTPUT_PINS.each {|pin| @io.mode pin,  OUTPUT }
+  end
+
   def check_serial
     while @serial.serialDataAvail > 0
       @serialBuffer += @serial.serialGetchar.chr
@@ -73,19 +85,19 @@ class Table
     end
   end
 
-  def reset_pins
-     if all_button_depressed?
-      led :off
-      unlock
-    end
-  end
-
   def all_button_depressed?
     INPUT_PINS.values.inject(1) { |r, value| r * @buttonstate[value] } == 1
   end
 
   def button_pressed?(button)
      !locked? and @buttonstate[button] == 0 # bottone premuto
+  end
+
+  def reset_pins
+     if all_button_depressed?
+      led :off
+      unlock
+    end
   end
 
   def led(state)
@@ -106,16 +118,6 @@ class Table
 
   def locked?
     @lock
-  end
-
-  def start_inputs
-    @io.mode INPUT_PINS[:goal_a], INPUT
-    @io.mode INPUT_PINS[:goal_b], INPUT
-    @io.mode INPUT_PINS[:start],  INPUT
-  end
-
-  def start_outputs
-    @io.mode OUTPUT_PINS[:led],  OUTPUT
   end
 end
 
