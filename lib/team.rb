@@ -1,6 +1,8 @@
 class Team
   attr_accessor :id, :score
 
+  #TODO: aggiungere l'attributo "name" al team
+
   def initialize(id)
     @id     = id
     @score  = 0
