@@ -30,7 +30,7 @@ class Table
     @io = WiringPi::GPIO.new(WPI_MODE_PINS)
     init_serial
     init_inputs
-    start_outputs
+    init_outputs
     unlock
   end
 
@@ -59,11 +59,11 @@ class Table
   end
 
   def init_inputs
-    INPUT_PINS.values.each { |pin| @io.mode pin, INPUT }
+    INPUT_PINS.values.each { |pin| @io.mode(pin, INPUT) }
   end
 
   def init_outputs
-    OUTPUT_PINS.each {|pin| @io.mode pin,  OUTPUT }
+    OUTPUT_PINS.values.each {|pin| @io.mode(pin, OUTPUT) }
   end
 
   def check_serial
@@ -77,7 +77,7 @@ class Table
   end
 
   def check_pressed(pin, opts)
-    if button_pressed? INPUT_PINS[:goal_a]
+    if button_pressed? pin
       lock
       led :on
       p opts[:message]
@@ -85,8 +85,10 @@ class Table
     end
   end
 
-  def all_button_depressed?
-    INPUT_PINS.values.inject(1) { |r, value| r * @buttonstate[value] } == 1
+  def all_button_released?
+    INPUT_PINS.values.inject(1) { |r, value|
+      r * @buttonstate[value] 
+    } == 1
   end
 
   def button_pressed?(button)
@@ -94,7 +96,7 @@ class Table
   end
 
   def reset_pins
-     if all_button_depressed?
+     if all_button_released?
       led :off
       unlock
     end
