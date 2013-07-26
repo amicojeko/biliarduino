@@ -68,8 +68,10 @@ class Table
   def mainloop
     loop do
       init_pins
+      wait_for_start
       register_players
       start_match
+      end_match
       check_pressed INPUT_PINS[:start], :message => 'inizio partita', :sound => GOAL_SOUND, :on => :idle do
         self.state = STATES[:registration]
       end
@@ -92,17 +94,17 @@ class Table
 
   private
 
-  def increase_score(team)
-    team.score += 1
-    if team.score >= GOALS
-      team.make_winner
-      p "the winner is team #{team.id}"
-      self.state = STATES[:end_match]
+  def wait_for_start
+    if state_idle? and !@done
+      p "idle - please push start button" 
+      @done = true
     end
   end
 
   def register_players
     if state_registration?
+      clear_players
+      clear_teams
       p 'register players'
       PLAYERS.times do |n|
         p "player #{n}:"
@@ -116,6 +118,25 @@ class Table
     end
   end
 
+  def get_player(player)
+    while @serial.serialDataAvail > 0
+      @serialBuffer += @serial.serialGetchar.chr
+    end
+    if @serialBuffer.size > 0
+      send "#{player}=", Player.new(@serialBuffer)
+      @serialBuffer = ''
+    end
+  end
+
+  def increase_score(team)
+    team.score += 1
+    if team.score >= GOALS
+      team.make_winner
+      p "the winner is team #{team.id}"
+      self.state = STATES[:end_match]
+    end   
+  end
+
   def start_match
     if state_start_match?
       p "match has started"
@@ -124,8 +145,13 @@ class Table
   end
 
   def end_match
-    p "match is over"
+    if state_end_match?
+      p "match is over"
+      self.state = STATES[:idle]
+      @done = false
+    end
   end
+
 
   def init_serial
     @serial = WiringPi::Serial.new('/dev/ttyAMA0',9600)
@@ -146,16 +172,6 @@ class Table
     OUTPUT_PINS.values.each {|pin| @io.mode(pin, OUTPUT) }
   end
 
-  def get_player(player)
-    while @serial.serialDataAvail > 0
-      @serialBuffer += @serial.serialGetchar.chr
-    end
-    if @serialBuffer.size > 0
-      send "#{player}=", Player.new(@serialBuffer)
-      @serialBuffer = ''
-    end
-  end
-
   def check_pressed(pin, opts)
     if button_pressed? pin      
       if !opts[:on] or opts[:on] && send("state_#{opts[:on]}?")
@@ -169,9 +185,7 @@ class Table
   end
 
   def all_button_released?
-    INPUT_PINS.values.inject(1) { |r, value|
-      r * @buttonstate[value] 
-    } == 1
+    INPUT_PINS.values.inject(1) { |r, value| r * @buttonstate[value] } == 1
   end
 
   def button_pressed?(button)
@@ -203,6 +217,14 @@ class Table
 
   def locked?
     @lock
+  end
+
+  def clear_teams
+    self.teams = []
+  end
+
+  def clear_players
+    PLAYERS.times {|n| send "player_#{n}=", nil}
   end
 end
 
