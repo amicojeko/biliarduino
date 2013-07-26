@@ -1,8 +1,8 @@
 class Player
-  ROLES = [:goalkeeper, :striker]
+  ROLES = [:defense, :attack]
   attr_accessor :id, :role
 
-  def initialize(id, role)
+  def initialize(id, role=:defense)
     @id   = id
     @role = role
     validate_role

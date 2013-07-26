@@ -1,5 +1,8 @@
 require 'wiringpi'
 
+require File.expand_path('../lib/player', __FILE__)
+require File.expand_path('../lib/team', __FILE__)
+
 class Game
   def initialize
   end
