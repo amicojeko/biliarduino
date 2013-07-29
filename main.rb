@@ -11,31 +11,32 @@ end
 
 
 class Table
-  GOALS       = 8
-  PLAYERS     = 4
-  GOLDEN_GOAL = false
-  INPUT_PINS  = {goal_a: 0, goal_b: 3, start: 4}
-  OUTPUT_PINS = {led: 7}
-  LED_STATES  = {:on => 1, :off => 0}
-  GOAL_SOUND  = 'media/horn.mp3'
-  GOAL_SOUND_A  = 'media/goal_team_a.wav'
-  GOAL_SOUND_B  = 'media/goal_team_b.wav'
-  IDLE_SOUND  = 'media/idle.wav'
-  REGISTER_SOUND  = 'media/register.wav'
+  GOALS              = 8
+  PLAYERS            = 4
+  GOLDEN_GOAL        = false
+  INPUT_PINS         = {goal_a: 0, goal_b: 3, start: 4}
+  OUTPUT_PINS        = {led: 7}
+  LED_STATES         = {:on => 1, :off => 0}
+  GOAL_SOUND         = 'media/horn.mp3'
+  GOAL_SOUND_A       = 'media/goal_team_a.wav'
+  GOAL_SOUND_B       = 'media/goal_team_b.wav'
+  IDLE_SOUND         = 'media/idle.wav'
+  REGISTER_SOUND     = 'media/register.wav'
   MATCH_START_SOUND  = 'media/match_start.wav'
-  MATCH_END_SOUND  = 'media/match_end.wav'
-  
+  MATCH_END_SOUND    = 'media/match_end.wav'
+
   IDLE_VIDEO  = 'media/Holly\ e\ Benji.flv'
   STATES      = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
 
 
+  attr_reader :gpio
   attr_accessor :state, :teams
 
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
 
 
   def initialize
-    @io = WiringPi::GPIO.new(WPI_MODE_PINS)
+    @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
     @teams = []
     init_serial
     init_inputs
@@ -83,7 +84,7 @@ class Table
 
   def wait_for_start
     if state_idle? and !@done
-      
+
       #play_video IDLE_VIDEO
       #fixme: se mettiamo il video si incasina un po tutto (non riesco a sopparlo :) )
       p "idle - please push start button"
@@ -101,7 +102,7 @@ class Table
       play_sound REGISTER_SOUND
       PLAYERS.times do |n|
         p "player #{n}:"
-        play_sound "media/player_#{n}.wav" 
+        play_sound "media/player_#{n}.wav"
         player = "player_#{n}"
         get_player player until send(player)
       end
@@ -158,17 +159,17 @@ class Table
   end
 
   def init_pins
-    @buttonstate = @io.readAll
+    @buttonstate = gpio.readAll
     init_inputs
     init_outputs
   end
 
   def init_inputs
-    INPUT_PINS.values.each { |pin| @io.mode(pin, INPUT) }
+    INPUT_PINS.values.each { |pin| gpio.mode(pin, INPUT) }
   end
 
   def init_outputs
-    OUTPUT_PINS.values.each {|pin| @io.mode(pin, OUTPUT) }
+    OUTPUT_PINS.values.each {|pin| gpio.mode(pin, OUTPUT) }
   end
 
   def check_pressed(pin, opts)
@@ -199,7 +200,7 @@ class Table
   end
 
   def led(state)
-    @io.write OUTPUT_PINS[:led], LED_STATES[state]
+    gpio.write OUTPUT_PINS[:led], LED_STATES[state]
   end
 
   def play_sound(sound)
