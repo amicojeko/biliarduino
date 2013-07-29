@@ -4,6 +4,7 @@ require File.expand_path('../lib/player', __FILE__)
 require File.expand_path('../lib/team', __FILE__)
 
 class Table
+  DELAY       = 0.002
   GOALS       = 8
   PLAYERS     = 4
   GOLDEN_GOAL = false
@@ -48,7 +49,7 @@ class Table
       start_match
       end_match
       check_buttons
-      sleep 0.002
+      sleep DELAY
     end
   end
 
@@ -58,11 +59,16 @@ class Table
     end
   end
 
+  def set_state(state)
+    @__printed = false
+    self.state = STATES[state]
+  end
+
   private
 
   def check_buttons
     check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => GOAL_SOUND, :on => :idle do
-      self.state = STATES[:registration]
+      set_state :registration
     end
     check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :sound => GOAL_SOUND_A, :on => :match do
       increase_score teams[0]
@@ -80,10 +86,9 @@ class Table
 
   def wait_for_start
     if state_idle? and !@done
-
       #play_video IDLE_VIDEO
       #fixme: se mettiamo il video si incasina un po tutto (non riesco a sopparlo :) )
-      p "idle - please push start button"
+      p_once "idle - please push start button"
       play_sound IDLE_SOUND
       @done = true
     end
@@ -104,7 +109,7 @@ class Table
       end
       teams << Team.new(:a)
       teams << Team.new(:b)
-      self.state = STATES[:start_match]
+      set_state :start_match
       puts self.state
     end
   end
@@ -125,7 +130,7 @@ class Table
       team.make_winner
       p "the winner is team #{team.id}"
       play_sound "media/winner_team_#{team.id}.wav"
-      self.state = STATES[:end_match]
+      set_state :end_match
     end
   end
 
@@ -133,7 +138,7 @@ class Table
     if state_start_match?
       p "match has started"
       play_sound MATCH_START_SOUND
-      self.state = STATES[:match]
+      set_state :match
     end
   end
 
@@ -143,7 +148,7 @@ class Table
       play_sound MATCH_END_SOUND
       #TODO: dare il risultato finale
       #p "the final result is..."
-      self.state = STATES[:idle]
+      set_state :idle
       @done = false
     end
   end
@@ -241,8 +246,15 @@ class Table
   def kill(pid)
     system 'kill -9 ' + pid.to_s
   end
+
+  def p_once(message)
+    unless @__printed
+      p message
+      @__printed = true
+    end
+  end
 end
 
 t = Table.new
-t.state = Table::STATES[:idle]
+t.set_state :idle
 t.mainloop
