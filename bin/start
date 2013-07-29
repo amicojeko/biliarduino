@@ -1,0 +1,1 @@
+cd .. & bundle exec rvmsudo ruby main.rb
