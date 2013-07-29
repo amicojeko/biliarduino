@@ -3,33 +3,29 @@ require 'wiringpi'
 require File.expand_path('../lib/player', __FILE__)
 require File.expand_path('../lib/team', __FILE__)
 
-class Game
-  def initialize
-  end
-end
-
-
-
 class Table
-  GOALS              = 8
-  PLAYERS            = 4
-  GOLDEN_GOAL        = false
-  INPUT_PINS         = {goal_a: 0, goal_b: 3, start: 4}
-  OUTPUT_PINS        = {led: 7}
-  LED_STATES         = {:on => 1, :off => 0}
+  GOALS       = 8
+  PLAYERS     = 4
+  GOLDEN_GOAL = false
+
+  INPUT_PINS  = {goal_a: 0, goal_b: 3, start: 4}
+  OUTPUT_PINS = {led: 7}
+  LED_STATES  = {:on => 1, :off => 0}
+  STATES      = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
+
+  IDLE_SOUND         = 'media/idle.wav'
   GOAL_SOUND         = 'media/horn.mp3'
   GOAL_SOUND_A       = 'media/goal_team_a.wav'
   GOAL_SOUND_B       = 'media/goal_team_b.wav'
-  IDLE_SOUND         = 'media/idle.wav'
   REGISTER_SOUND     = 'media/register.wav'
   MATCH_START_SOUND  = 'media/match_start.wav'
   MATCH_END_SOUND    = 'media/match_end.wav'
 
   IDLE_VIDEO  = 'media/Holly\ e\ Benji.flv'
-  STATES      = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
 
 
-  attr_reader :gpio
+
+  attr_reader   :gpio
   attr_accessor :state, :teams
 
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
