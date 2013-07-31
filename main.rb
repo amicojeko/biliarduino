@@ -4,9 +4,11 @@ require File.expand_path('../lib/player', __FILE__)
 require File.expand_path('../lib/team', __FILE__)
 
 class Table
+  # TODO much of these constants should go in a configuration file
   DELAY       = 0.002
   GOALS       = 8
   PLAYERS     = 4
+  GOAL_DELAY  = 3
   GOLDEN_GOAL = false
 
   INPUT_PINS  = {goal_a: 0, goal_b: 3, start: 4}
@@ -14,27 +16,28 @@ class Table
   LED_STATES  = {:on => 1, :off => 0}
   STATES      = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
 
-  IDLE_SOUND         = 'media/idle.wav'
-  GOAL_SOUND         = 'media/horn.mp3'
-  GOAL_SOUND_A       = 'media/goal_team_a.wav'
-  GOAL_SOUND_B       = 'media/goal_team_b.wav'
-  REGISTER_SOUND     = 'media/register.wav'
-  MATCH_START_SOUND  = 'media/match_start.wav'
-  MATCH_END_SOUND    = 'media/match_end.wav'
+  IDLE_SOUND        = 'media/idle.wav'
+  GOAL_SOUND        = 'media/horn.mp3'
+  GOAL_SOUND_A      = 'media/goal_team_a.wav'
+  GOAL_SOUND_B      = 'media/goal_team_b.wav'
+  REGISTER_SOUND    = 'media/register.wav'
+  MATCH_START_SOUND = 'media/match_start.wav'
+  MATCH_END_SOUND   = 'media/match_end.wav'
 
   IDLE_VIDEO  = 'media/Holly\ e\ Benji.flv'
 
 
 
   attr_reader   :gpio
-  attr_accessor :state, :teams
-
+  attr_accessor :state, :teams, :last_goal_at
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
+
 
 
   def initialize
     @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
     @teams = []
+    set_goal_time
     init_serial
     init_inputs
     init_outputs
@@ -79,11 +82,6 @@ class Table
     reset_pins
   end
 
-  # TO_DELETE: cagata fatta per debuggare il say
-  # def p(param)
-  #   say(param)
-  # end
-
   def wait_for_start
     if state_idle? and !@done
       #play_video IDLE_VIDEO
@@ -125,14 +123,17 @@ class Table
   end
 
   def increase_score(team)
-    team.score += 1
-    #FIXME: non so se va qua, è la procedura per fare la foto
-    get_snapshot(team.id)
-    if team.score >= GOALS
-      team.make_winner
-      p "the winner is team #{team.id}"
-      play_sound "media/winner_team_#{team.id}.wav"
-      set_state :end_match
+    unless goal_already_registered?
+      set_goal_time
+      team.score += 1
+      # FIXME: non so se va qua, è la procedura per fare la foto
+      get_snapshot team.id
+      if team.score >= GOALS
+        team.set_winner
+        p "the winner is team #{team.id}"
+        play_sound "media/winner_team_#{team.id}.wav"
+        set_state :end_match
+      end
     end
   end
 
@@ -148,12 +149,11 @@ class Table
     if state_end_match?
       p "match is over"
       play_sound MATCH_END_SOUND
-      #TODO: dare il risultato finale
-      #p "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
+      # TODO: dare il risultato finale
+      # p "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
       set_state :idle
     end
   end
-
 
   def init_serial
     @serial = WiringPi::Serial.new('/dev/ttyAMA0',9600)
@@ -220,7 +220,7 @@ class Table
   end
 
   def say(text)
-    #@say_pid = fork { exec 'echo "' + text + '" | festival --tts'}
+    # @say_pid = fork { exec 'echo "' + text + '" | festival --tts'}
     @say_pid = fork { exec 'espeak "' + text + '"'}
   end
 
@@ -245,11 +245,11 @@ class Table
   end
 
   def kill(pid)
-    system 'kill -9 ' + pid.to_s
+    system "kill -9 #{pid}"
   end
 
   def get_snapshot(camera)
-    fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam#{Time.now.to_i}.jpg'"}    
+    fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam#{Time.now.to_i}.jpg'"}
   end
 
   def p_once(message)
@@ -257,6 +257,14 @@ class Table
       p message
       @__printed = true
     end
+  end
+
+  def set_goal_time
+    self.last_goal_at = Time.now
+  end
+
+  def goal_already_registered?
+    last_goal_at + 3 >= Time.now
   end
 end
 
