@@ -9,7 +9,7 @@ class Team
     @winner = false
   end
 
-  def make_winner
+  def set_winner
     @winner = true
   end
 
