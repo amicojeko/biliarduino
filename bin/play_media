@@ -1,0 +1,4 @@
+#! /bin/sh
+
+omxplayer  -o local "$1" < fifo &
+echo -n "." > fifo

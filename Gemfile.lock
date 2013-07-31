@@ -1,3 +1,9 @@
+GIT
+  remote: https://github.com/spaghetticode/wiringpi_kb_adapter
+  revision: 50bbe5e7f17a8af2c023a1a69aa80e84cee4eb5b
+  specs:
+    wiringpi_kb_adapter (0.0.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -38,3 +44,4 @@ DEPENDENCIES
   guard-rspec
   rb-fsevent (~> 0.9)
   rspec
+  wiringpi_kb_adapter!
