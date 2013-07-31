@@ -126,6 +126,8 @@ class Table
 
   def increase_score(team)
     team.score += 1
+    #FIXME: non so se va qua, è la procedura per fare la foto
+    get_snapshot(team.id)
     if team.score >= GOALS
       team.make_winner
       p "the winner is team #{team.id}"
@@ -147,9 +149,8 @@ class Table
       p "match is over"
       play_sound MATCH_END_SOUND
       #TODO: dare il risultato finale
-      #p "the final result is..."
+      #p "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
       set_state :idle
-      @done = false
     end
   end
 
@@ -211,11 +212,11 @@ class Table
     #qui ho messo system perché alcuni suoni devono essere bloccanti (come le voci di inizio partita ecc...)
     #e altri no (Come il suono del gol)
     #TODO: aggiungere un parametro per decidere se il suono è bloccante o meno, o almeno trovare il modo di evitare che i suoni si sovrappongano
-    system 'omxplayer -o local ' + sound
+    system 'bin/play_media ' + sound
   end
 
   def play_video(video)
-    @video_pid = fork { exec 'omxplayer -o local ' + video }
+    @video_pid = fork { exec 'bin/play_media ' + video }
   end
 
   def say(text)
@@ -245,6 +246,10 @@ class Table
 
   def kill(pid)
     system 'kill -9 ' + pid.to_s
+  end
+
+  def get_snapshot(camera)
+    fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam#{Time.now.to_i}.jpg'"}    
   end
 
   def p_once(message)
