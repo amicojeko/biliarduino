@@ -6,6 +6,5 @@ DIR=/home/pi/ruby/biliarduino
 cd $DIR
 
 [ -f fifo ] || mkfifo fifo
-mkdir -p logs
 sudo chmod 777 fifo
 $RVM $RUBY main.rb & 2>&1 > logs/biliarduino_log.txt

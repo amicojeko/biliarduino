@@ -1,4 +1,5 @@
 require 'wiringpi'
+require 'omxplayer'
 
 require File.expand_path('../lib/player', __FILE__)
 require File.expand_path('../lib/team', __FILE__)
@@ -6,7 +7,7 @@ require File.expand_path('../lib/team', __FILE__)
 class Table
   # TODO much of these constants should go in a configuration file
   DELAY       = 0.002
-  GOALS       = 8
+  GOALS       = 4
   PLAYERS     = 4
   GOAL_DELAY  = 3
   GOLDEN_GOAL = false
@@ -36,6 +37,7 @@ class Table
 
   def initialize
     @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
+    @omx = Omxplayer.instance
     @teams = []
     set_goal_time
     init_serial
@@ -46,7 +48,7 @@ class Table
 
   def mainloop
     loop do
-      init_pins
+      read_pins
       wait_for_start
       register_players
       start_match
@@ -160,10 +162,9 @@ class Table
     @serialBuffer = ''
   end
 
-  def init_pins
+  def read_pins
     @buttonstate = gpio.readAll
-    init_inputs
-    init_outputs
+    p @buttonstate
   end
 
   def init_inputs
@@ -206,13 +207,7 @@ class Table
   end
 
   def play_sound(sound)
-    #@sound_pid = fork { exec 'mpg123','-q', sound }
-    #@sound_pid = fork { exec 'omxplayer -o local ' + sound }
-    #trovo che omxplayer sia piu performante di mpg123, e legge anche i wav, cosa che mpg123 non fa
-    #qui ho messo system perché alcuni suoni devono essere bloccanti (come le voci di inizio partita ecc...)
-    #e altri no (Come il suono del gol)
-    #TODO: aggiungere un parametro per decidere se il suono è bloccante o meno, o almeno trovare il modo di evitare che i suoni si sovrappongano
-    system 'bin/play_media ' + sound
+    @omx.open(sound)
   end
 
   def play_video(video)
