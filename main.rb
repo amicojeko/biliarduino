@@ -20,7 +20,7 @@ class InputPin
   def locked?
     result = locked and locked_at + lock_timeframe >= Time.now
     puts "pin #{pin} is currently #{result ? 'locked' : 'unlocked'}"
-    puts "until #{locked_at + lock_timeframe} it will be locked"
+    puts "until #{locked_at + lock_timeframe} it will be locked" if result
     result
   end
 
