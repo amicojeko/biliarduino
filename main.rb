@@ -18,7 +18,7 @@ class InputPin
   end
 
   def locked?
-    result = locked and locked_at + lock_timeframe <= Time.now
+    result = locked and locked_at + lock_timeframe >= Time.now
     puts "pin #{pin} is currently #{result ? 'locked' : 'unlocked'}"
     result
   end
