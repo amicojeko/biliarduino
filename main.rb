@@ -8,20 +8,21 @@ require File.expand_path('../lib/team',   __FILE__)
 
 
 class InputPin
-  # lock_time is used to lock only this input for consecutive press events, while glock_time locks the inputs globally for given seconds
-  attr_reader :pin, :pressed_value, :lock_time, :locked
+  # lock_timeframe is used to lock only this input for consecutive press events, while glock_timeframe locks the inputs globally for given seconds
+  attr_reader :pin, :pressed_value, :lock_timeframe, :locked, :locked_at
 
   def initialize(pin, opts)
-    @pin           = pin
-    @lock_time     = opts[:lock_time]
-    @pressed_value = opts[:pressed_value]
+    @pin            = pin
+    @lock_timeframe = opts[:lock_timeframe]*60
+    @pressed_value  = opts[:pressed_value]
   end
 
   def locked?
-    locked
+    locked and locked_at + lock_timeframe <= Time.now
   end
 
   def lock
+    @locked_at = Time.now
     @locked = true
   end
 
@@ -44,8 +45,8 @@ class Table
   LED_STATES  = {:on => 1, :off => 0}
   STATES      = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
   INPUT_PINS  = {
-    goal_a: InputPin.new(0, :pressed_value => 1, :glock_time => 3),
-    goal_b: InputPin.new(3, :pressed_value => 1, :glock_time => 3),
+    goal_a: InputPin.new(0, :pressed_value => 1, :glock_timeframe => 3),
+    goal_b: InputPin.new(3, :pressed_value => 1, :glock_timeframe => 3),
     start:  InputPin.new(4, :pressed_value => 0) # no locking here
   }
 
@@ -61,7 +62,7 @@ class Table
   IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
 
 
-  attr_reader   :gpio
+  attr_reader   :gpio, :omx
   attr_accessor :state, :teams, :last_goal_at
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
 
@@ -96,20 +97,20 @@ class Table
   end
 
   def set_state(state)
-    @__printed = false
+    @__flushed = false
     self.state = STATES[state]
   end
 
   private
 
   def check_input_pins
-    check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => START_SOUND, :on_state => :idle do
+    check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => START_SOUND, :on_state => :idle do |pin|
       set_state :registration
     end
-    check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :sound => GOAL_SOUND_A, :on_state => :match do
+    check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :sound => GOAL_SOUND_A, :on_state => :match do |pin|
       increase_score teams[0]
     end
-    check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :sound => GOAL_SOUND_B, :on_state => :match do
+    check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :sound => GOAL_SOUND_B, :on_state => :match do |pin|
       increase_score teams[1]
     end
     reset_input_pins
@@ -154,18 +155,13 @@ class Table
   end
 
   def increase_score(team)
-    unless goal_already_registered?
-      set_goal_time
-      team.score += 1
-      get_snapshot team
-      debug "team #{team.name} score: #{team.score}"
-      if team.score >= MAX_GOALS
-        finalize_match(team)
-      end
-      unglock # trouble...
-    else
-      puts 'goal still already registered'
+    team.score += 1
+    get_snapshot team
+    debug "team #{team.name} score: #{team.score}"
+    if team.score >= MAX_GOALS
+      finalize_match team
     end
+    unglock
   end
 
   def start_match
@@ -217,7 +213,7 @@ class Table
         glock
         debug opts[:message]
         play_sound opts[:sound]
-        yield if block_given?
+        yield pin if block_given?
       end
     end
   end
@@ -233,16 +229,14 @@ class Table
   end
 
   def reset_input_pins
-     unless any_pin_pressed?
-      unglock
-    end
+    unglock unless any_pin_pressed?
   end
 
   def led(state)
     gpio.write OUTPUT_PINS[:led], LED_STATES[state]
   end
 
-  # glock is global lock, locks all inputs. Each input can have its own lock, and its own input unlocker
+  # glock is global lock, locks all inputs. Each input can have its own lock
   def glock
     led :on
     @glock = true
@@ -262,25 +256,11 @@ class Table
     PLAYERS.times {|n| send "player_#{n}=", nil}
   end
 
-  def kill(pid)
-    system "kill -9 #{pid}"
-  end
-
-  # FIXME prende un parametro, ma non viene usato
-  def get_snapshot(team)
-    camera = team.id
-    fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam_#{Time.now.to_i}.jpg'"}
-  end
-
   def debug_once(message)
-    unless @__printed
+    unless @__flushed
       debug message
-      @__printed = true
+      @__flushed = true
     end
-  end
-
-  def set_goal_time
-    self.last_goal_at = Time.now
   end
 
   def goal_already_registered?
@@ -295,6 +275,12 @@ class Table
     p message
   end
 
+  # FIXME prende un parametro, ma non viene usato
+  def get_snapshot(team)
+    camera = team.id
+    fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam_#{Time.now.to_i}.jpg'"}
+  end
+
   def finalize_match(team)
     team.set_winner
     debug "the winner is team #{team.name}"
@@ -303,8 +289,8 @@ class Table
   end
 
   def play_sound(sound)
-    @omx.open(sound[:name])
-    sleep sound[:duration]
+    omx.open sound[:name]
+    sleep sound[:duration] || 0
   end
 
   def play_video(video)
