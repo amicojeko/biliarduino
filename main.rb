@@ -18,8 +18,9 @@ class InputPin
   end
 
   def locked?
-    result = locked and locked_at + lock_timeframe <= Time.now
+    result = locked and locked_at + lock_timeframe >= Time.now
     puts "pin #{pin} is currently #{result ? 'locked' : 'unlocked'}"
+    puts "until #{locked_at + lock_timeframe} it will be locked" if result
     result
   end
 
@@ -108,13 +109,13 @@ class Table
     check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => START_SOUND, :on_state => :idle do |pin|
       set_state :registration
     end
-    check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :sound => GOAL_SOUND_A, :on_state => :match do |pin|
+    check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :on_state => :match do |pin|
       unless pin.locked?
         increase_score(teams[0])
         pin.lock
       end
     end
-    check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :sound => GOAL_SOUND_B, :on_state => :match do |pin|
+    check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :on_state => :match do |pin|
       unless pin.locked?
         increase_score(teams[1])
         pin.lock
@@ -165,6 +166,7 @@ class Table
     team.score += 1
     get_snapshot team
     debug "team #{team.name} score: #{team.score}"
+    play_sound self.class.const_get("GOAL_SOUND_#{team.name}")
     if team.score >= MAX_GOALS
       finalize_match team
     end
@@ -219,7 +221,7 @@ class Table
       if !opts[:on_state] or opts[:on_state] && send("state_#{opts[:on_state]}?")
         glock
         debug opts[:message]
-        play_sound opts[:sound]
+        play_sound opts[:sound] if opts[:sound]
         yield pin if block_given?
       end
     end
