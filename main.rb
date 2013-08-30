@@ -158,7 +158,7 @@ class Table
       set_goal_time
       team.score += 1
       get_snapshot team
-      debug "team #{team.id} score: #{team.score}"
+      debug "team #{team.name} score: #{team.score}"
       if team.score >= MAX_GOALS
         finalize_match(team)
       end
@@ -297,8 +297,8 @@ class Table
 
   def finalize_match(team)
     team.set_winner
-    debug "the winner is team #{team.id}"
-    play_sound sound self.class.const_get "WINNER_TEAM_#{team.id}"
+    debug "the winner is team #{team.name}"
+    play_sound sound self.class.const_get "WINNER_TEAM_#{team.name}"
     set_state :end_match
   end
 
