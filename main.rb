@@ -18,11 +18,19 @@ class InputPin
   end
 
   def locked?
-    result = locked and locked_at + lock_timeframe >= Time.now
-    puts "pin #{pin} is currently #{result ? 'locked' : 'unlocked'}"
-    puts "#{locked_at + lock_timeframe}, #{Time.now}" if result
-    puts "until #{locked_at + lock_timeframe} it will be locked" if result
-    result
+    if locked
+      puts "its locked"
+      if locked_at + lock_timeframe >= Time.now
+        puts "locked_at + lock_timeframe >= Time.now è true: #{locked_at + lock_timeframe} >= #{Time.now}"
+        true
+      else
+        puts "locked_at + lock_timeframe >= Time.now è false: #{locked_at + lock_timeframe} < #{Time.now}"
+        false
+      end
+    else
+      puts "its not locked"
+      false
+    end
   end
 
   def lock
