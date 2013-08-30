@@ -109,10 +109,16 @@ class Table
       set_state :registration
     end
     check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :sound => GOAL_SOUND_A, :on_state => :match do |pin|
-      increase_score(teams[0]) unless pin.locked?
+      unless pin.locked?
+        increase_score(teams[0])
+        pin.lock
+      end
     end
     check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :sound => GOAL_SOUND_B, :on_state => :match do |pin|
-      increase_score(teams[1]) unless pin.locked?
+      unless pin.locked?
+        increase_score(teams[1])
+        pin.lock
+      end
     end
     reset_input_pins
   end
