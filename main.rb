@@ -47,8 +47,8 @@ class Table
   LED_STATES  = {:on => 1, :off => 0}
   STATES      = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
   INPUT_PINS  = {
-    goal_a: InputPin.new(0, :pressed_value => 1, :glock_timeframe => 3),
-    goal_b: InputPin.new(3, :pressed_value => 1, :glock_timeframe => 3),
+    goal_a: InputPin.new(0, :pressed_value => 1, :lock_timeframe => 5),
+    goal_b: InputPin.new(3, :pressed_value => 1, :lock_timeframe => 5),
     start:  InputPin.new(4, :pressed_value => 0) # no locking here
   }
 
