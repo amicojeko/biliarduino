@@ -17,13 +17,15 @@ class Table
   LED_STATES  = {:on => 1, :off => 0}
   STATES      = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
 
-  IDLE_SOUND        = 'media/idle.wav'
-  GOAL_SOUND        = 'media/horn.mp3'
-  GOAL_SOUND_A      = 'media/goal_team_a.wav'
-  GOAL_SOUND_B      = 'media/goal_team_b.wav'
-  REGISTER_SOUND    = 'media/register.wav'
-  MATCH_START_SOUND = 'media/match_start.wav'
-  MATCH_END_SOUND   = 'media/match_end.wav'
+  IDLE_SOUND        = {:name => 'media/idle.wav'          ,:duration => 2}
+  GOAL_SOUND        = {:name => 'media/horn.mp3'          ,:duration => 2}
+  GOAL_SOUND_A      = {:name => 'media/goal_team_a.wav'   ,:duration => 2}
+  GOAL_SOUND_B      = {:name => 'media/goal_team_b.wav'   ,:duration => 2}
+  REGISTER_SOUND    = {:name => 'media/register.wav'      ,:duration => 2}
+  MATCH_START_SOUND = {:name => 'media/match_start.wav'   ,:duration => 2}
+  MATCH_END_SOUND   = {:name => 'media/match_end.wav'     ,:duration => 2}
+  WINNER_TEAM_A     = {:name => "media/winner_team_a.wav" ,:duration => 2}
+  WINNER_TEAM_B     = {:name => "media/winner_team_b.wav" ,:duration => 2}
 
   IDLE_VIDEO  = 'media/Holly\ e\ Benji.flv'
 
@@ -49,8 +51,8 @@ class Table
   def mainloop
     loop do
       read_pins
-      wait_for_start
-      register_players
+      # wait_for_start
+      # register_players
       start_match
       end_match
       check_buttons
@@ -72,13 +74,13 @@ class Table
   private
 
   def check_buttons
-    check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => GOAL_SOUND, :on => :idle do
+    check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => GOAL_SOUND, :on => :idle, :pressed_value => 0 do
       set_state :registration
     end
-    check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :sound => GOAL_SOUND_A, :on => :match do
+    check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :sound => GOAL_SOUND_A, :on => :match, :pressed_value => 1 do
       increase_score teams[0]
     end
-    check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :sound => GOAL_SOUND_B, :on => :match do
+    check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :sound => GOAL_SOUND_B, :on => :match, :pressed_value => 1 do
       increase_score teams[1]
     end
     reset_pins
@@ -103,7 +105,7 @@ class Table
       play_sound REGISTER_SOUND
       PLAYERS.times do |n|
         p "player #{n}:"
-        play_sound "media/player_#{n}.wav"
+        play_sound({:name => "media/player_#{n}.wav", :duration => 2}) # TODO scompattare i suoni dei player
         player = "player_#{n}"
         get_player player until send(player)
       end
@@ -130,16 +132,27 @@ class Table
       team.score += 1
       # FIXME: non so se va qua, è la procedura per fare la foto
       get_snapshot team.id
+      p "score is #{team.score} for team #{team.id}"
       if team.score >= GOALS
         team.set_winner
         p "the winner is team #{team.id}"
-        play_sound "media/winner_team_#{team.id}.wav"
+        sound = team.id == :a ? WINNER_TEAM_A : WINNER_TEAM_B # FIXME this is crap
+        play_sound sound
         set_state :end_match
       end
+      unlock
+    else
+      puts 'goal still already registered'
     end
   end
 
   def start_match
+    unless $A
+      set_state :start_match # TODO remove
+      teams << Team.new(:a)
+      teams << Team.new(:b)
+      $A = true
+    end
     if state_start_match?
       p "match has started"
       play_sound MATCH_START_SOUND
@@ -164,7 +177,7 @@ class Table
 
   def read_pins
     @buttonstate = gpio.readAll
-    p @buttonstate
+    # p @buttonstate
   end
 
   def init_inputs
@@ -176,7 +189,7 @@ class Table
   end
 
   def check_pressed(pin, opts)
-    if button_pressed? pin
+    if button_pressed? pin, opts[:pressed_value]
       if !opts[:on] or opts[:on] && send("state_#{opts[:on]}?")
         lock
         led :on
@@ -191,8 +204,8 @@ class Table
     INPUT_PINS.values.inject(1) { |r, value| r * @buttonstate[value] } == 1
   end
 
-  def button_pressed?(button)
-     !locked? and @buttonstate[button] == 0 # bottone premuto
+  def button_pressed?(button, pressed_value)
+    !locked? and @buttonstate[button] == pressed_value
   end
 
   def reset_pins
@@ -207,11 +220,12 @@ class Table
   end
 
   def play_sound(sound)
-    @omx.open(sound)
+    @omx.open(sound[:name])
+    sleep sound[:duration]
   end
 
   def play_video(video)
-    @video_pid = fork { exec 'bin/play_media ' + video }
+    # @video_pid = fork { exec 'bin/play_media ' + video }
   end
 
   def say(text)
@@ -259,7 +273,9 @@ class Table
   end
 
   def goal_already_registered?
-    last_goal_at + 3 >= Time.now
+    enough_time_passed = last_goal_at + 3 >= Time.now
+    unlock if enough_time_passed
+    enough_time_passed
   end
 end
 
