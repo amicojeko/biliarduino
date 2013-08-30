@@ -18,7 +18,9 @@ class InputPin
   end
 
   def locked?
-    locked and locked_at + lock_timeframe <= Time.now
+    result = locked and locked_at + lock_timeframe <= Time.now
+    puts "pin #{pin} is currently #{result ? 'locked' : 'unlocked'}"
+    result
   end
 
   def lock
@@ -71,7 +73,6 @@ class Table
     @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
     @omx   = Omxplayer.instance
     @teams = []
-    set_goal_time
     init_serial
     init_inputs
     init_outputs
@@ -108,10 +109,10 @@ class Table
       set_state :registration
     end
     check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :sound => GOAL_SOUND_A, :on_state => :match do |pin|
-      increase_score teams[0]
+      increase_score(teams[0]) unless pin.locked?
     end
     check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :sound => GOAL_SOUND_B, :on_state => :match do |pin|
-      increase_score teams[1]
+      increase_score(teams[1]) unless pin.locked?
     end
     reset_input_pins
   end
@@ -261,12 +262,6 @@ class Table
       debug message
       @__flushed = true
     end
-  end
-
-  def goal_already_registered?
-    enough_time_passed = last_goal_at + 3 >= Time.now
-    unglock if enough_time_passed
-    enough_time_passed
   end
 
   private
