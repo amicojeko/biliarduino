@@ -220,7 +220,7 @@ class Table
       if !opts[:on_state] or opts[:on_state] && send("state_#{opts[:on_state]}?")
         glock
         debug opts[:message]
-        play_sound opts[:sound]
+        play_sound opts[:sound] if opts[:sound]
         yield pin if block_given?
       end
     end
