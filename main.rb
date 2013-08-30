@@ -14,7 +14,7 @@ class InputPin
   def initialize(pin, opts)
     @pin            = pin
     @lock_timeframe = opts.fetch(:lock_timeframe, 0)
-    @pressed_value  = opts[:pressed_value]
+    @pressed_value  = opts.fetch(:pressed_value, 0)
   end
 
   def locked?
