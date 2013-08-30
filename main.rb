@@ -203,7 +203,7 @@ class Table
   end
 
   def init_inputs
-    INPUT_PINS.each { |pin| gpio.mode(pin.pin, INPUT) }
+    INPUT_PINS.values.each { |pin| gpio.mode(pin.pin, INPUT) }
   end
 
   def init_outputs
@@ -223,7 +223,7 @@ class Table
   end
 
   def any_pin_pressed?
-    INPUT_PINS.inject false do |bool, pin|
+    INPUT_PINS.values.inject false do |bool, pin|
       bool ||= @buttonstate[pin.pin] == pin.pressed_value
     end
   end
