@@ -47,27 +47,27 @@ class Table
   # TODO much of these constants should go in a configuration file
   MAX_GOALS   = 4
   PLAYERS     = 4
-  GOAL_DELAY  = 3
+  GOAL_DELAY  = 2
   DELAY       = 0.002
   GOLDEN_GOAL = false
   OUTPUT_PINS = {led: 7} # TODO the only output pin used now is for debugging glocked input state
   LED_STATES  = {:on => 1, :off => 0}
   STATES      = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
   INPUT_PINS  = {
-    goal_a: InputPin.new(0, :pressed_value => 1, :lock_timeframe => 5),
-    goal_b: InputPin.new(3, :pressed_value => 1, :lock_timeframe => 5),
+    goal_a: InputPin.new(0, :pressed_value => 1, :lock_timeframe => GOAL_DELAY),
+    goal_b: InputPin.new(3, :pressed_value => 1, :lock_timeframe => GOAL_DELAY),
     start:  InputPin.new(4, :pressed_value => 0) # no locking here
   }
 
-  IDLE_SOUND        = {:name => 'media/idle.wav'          , :duration => 2}
-  START_SOUND       = {:name => 'media/horn.mp3'          , :duration => 2}
-  GOAL_SOUND_A      = {:name => 'media/goal_team_a.wav'   , :duration => 2}
-  GOAL_SOUND_B      = {:name => 'media/goal_team_b.wav'   , :duration => 2}
-  REGISTER_SOUND    = {:name => 'media/register.wav'      , :duration => 2}
-  MATCH_START_SOUND = {:name => 'media/match_start.wav'   , :duration => 2}
-  MATCH_END_SOUND   = {:name => 'media/match_end.wav'     , :duration => 2}
-  WINNER_TEAM_A     = {:name => "media/winner_team_a.wav" , :duration => 2}
-  WINNER_TEAM_B     = {:name => "media/winner_team_b.wav" , :duration => 2}
+  IDLE_SOUND        = {:name => 'media/idle.wav'         , :duration => 1}
+  START_SOUND       = {:name => 'media/horn.mp3'         , :duration => 1}
+  GOAL_SOUND_A      = {:name => 'media/goal_team_a.wav'  , :duration => 1}
+  GOAL_SOUND_B      = {:name => 'media/goal_team_b.wav'  , :duration => 1}
+  REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 1}
+  MATCH_START_SOUND = {:name => 'media/match_start.wav'  , :duration => 1}
+  MATCH_END_SOUND   = {:name => 'media/match_end.wav'    , :duration => 1}
+  WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1}
+  WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1}
   IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
 
 
