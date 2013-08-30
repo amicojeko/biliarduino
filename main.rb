@@ -17,18 +17,15 @@ class InputPin
     @pressed_value  = opts.fetch(:pressed_value, 0)
   end
 
+  # TODO refactor this shit
   def locked?
     if locked
-      puts "its locked"
       if locked_at + lock_timeframe >= Time.now
-        puts "locked_at + lock_timeframe >= Time.now è true: #{locked_at + lock_timeframe} >= #{Time.now}"
         true
       else
-        puts "locked_at + lock_timeframe >= Time.now è false: #{locked_at + lock_timeframe} < #{Time.now}"
         false
       end
     else
-      puts "its not locked"
       false
     end
   end
@@ -92,8 +89,8 @@ class Table
   def mainloop
     loop do
       read_pins
-      # wait_for_start
-      # register_players
+      wait_for_start
+      register_players
       start_match
       end_match
       check_input_pins
@@ -183,12 +180,6 @@ class Table
   end
 
   def start_match
-    unless $A
-      set_state :start_match # TODO remove
-      teams << Team.new(:a)
-      teams << Team.new(:b)
-      $A = true
-    end
     if state_start_match?
       debug "match has started"
       play_sound MATCH_START_SOUND
