@@ -1,3 +1,5 @@
+
+
 require 'wiringpi'
 require 'omxplayer'
 
@@ -59,11 +61,11 @@ class Table
     start:  InputPin.new(4, :pressed_value => 0) # no locking here
   }
 
-  IDLE_SOUND        = {:name => 'media/idle.wav'         , :duration => 1}
+  IDLE_SOUND        = {:name => 'media/idle.wav'         , :duration => 2}
   START_SOUND       = {:name => 'media/horn.mp3'         , :duration => 1}
   GOAL_SOUND_A      = {:name => 'media/goal_team_a.wav'  , :duration => 1}
   GOAL_SOUND_B      = {:name => 'media/goal_team_b.wav'  , :duration => 1}
-  REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 1}
+  REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 2}
   MATCH_START_SOUND = {:name => 'media/match_start.wav'  , :duration => 1}
   MATCH_END_SOUND   = {:name => 'media/match_end.wav'    , :duration => 1}
   WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1}
@@ -137,6 +139,7 @@ class Table
       debug_once "idle - please push start button"
       play_sound IDLE_SOUND
       @started = true
+      set_state :registration # remove
     end
   end
 
@@ -154,7 +157,6 @@ class Table
       teams << Team.new(:a)
       teams << Team.new(:b)
       set_state :start_match
-      debug self.state
     end
   end
 
@@ -163,6 +165,7 @@ class Table
       @serialBuffer += @serial.serialGetchar.chr
     end
     if @serialBuffer.size > 0
+      debug "player id: #{@serialBuffer}"
       send "#{player}=", Player.new(@serialBuffer)
       @serialBuffer = ''
     end
