@@ -47,15 +47,16 @@ end
 
 class Table
   # TODO much of these constants should go in a configuration file
-  MAX_GOALS   = 4
-  PLAYERS     = 4
-  GOAL_DELAY  = 2
-  DELAY       = 0.002
-  GOLDEN_GOAL = false
-  OUTPUT_PINS = {led: 7} # TODO the only output pin used now is for debugging glocked input state
-  LED_STATES  = {:on => 1, :off => 0}
-  STATES      = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
-  INPUT_PINS  = {
+  MAX_GOALS    = 4
+  PLAYERS      = 4
+  GOAL_DELAY   = 2
+  DELAY        = 0.002
+  SERIAL_DELAY = 0.02
+  GOLDEN_GOAL  = false
+  OUTPUT_PINS  = {led: 7} # TODO the only output pin used now is for debugging glocked input state
+  LED_STATES   = {:on => 1, :off => 0}
+  STATES       = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
+  INPUT_PINS   = {
     goal_a: InputPin.new(0, :pressed_value => 1, :lock_timeframe => GOAL_DELAY),
     goal_b: InputPin.new(3, :pressed_value => 1, :lock_timeframe => GOAL_DELAY),
     start:  InputPin.new(4, :pressed_value => 0) # no locking here
@@ -163,10 +164,12 @@ class Table
   def get_player(player)
     while @serial.serialDataAvail > 0
       @serialBuffer += @serial.serialGetchar.chr
+      sleep SERIAL_DELAY
     end
     if @serialBuffer.size > 0
-      debug "player id: #{@serialBuffer}"
-      send "#{player}=", Player.new(@serialBuffer)
+      code = sanitizeSerialBufferString
+      debug "#{player}: {code}"
+      send "#{player}=", Player.new(code)
       @serialBuffer = ''
     end
   end
@@ -307,6 +310,15 @@ class Table
   def say(text)
     # @say_pid = fork { exec 'echo "' + text + '" | festival --tts'}
     @say_pid = fork { exec 'espeak "' + text + '"'}
+  end
+
+  # TODO this is rather crappy
+  def sanitizeSerialBufferString
+    begin
+      @serialBuffer.split("\u0002")[1].split("\u0003")[0]
+    rescue
+      raise "could not read data correctly from serial buffer"
+    end
   end
 end
 
