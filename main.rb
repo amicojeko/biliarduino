@@ -162,15 +162,17 @@ class Table
   end
 
   def get_player(player)
-    while @serial.serialDataAvail > 0
-      @serialBuffer += @serial.serialGetchar.chr
-      sleep SERIAL_DELAY
-    end
-    if @serialBuffer.size > 0
-      code = sanitizeSerialBufferString
-      debug "#{player}: {code}"
-      send "#{player}=", Player.new(code)
-      @serialBuffer = ''
+    if @serial.serialDataAvail > 0
+      while @serial.serialDataAvail > 0
+        @serialBuffer += @serial.serialGetchar.chr
+        sleep SERIAL_DELAY
+      end
+      if @serialBuffer.size > 0
+        code = sanitizeSerialBufferString
+        debug "#{player}: #{code}"
+        send "#{player}=", Player.new(code)
+        @serialBuffer = ''
+      end
     end
   end
 
@@ -325,3 +327,5 @@ end
 t = Table.new
 t.set_state :idle
 t.mainloop
+
+
