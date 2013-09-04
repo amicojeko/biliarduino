@@ -140,7 +140,6 @@ class Table
       debug_once "idle - please push start button"
       play_sound IDLE_SOUND
       @started = true
-      set_state :registration # remove
     end
   end
 
