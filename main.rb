@@ -1,55 +1,14 @@
-
-
 require 'wiringpi'
 require 'omxplayer'
 
 require File.expand_path('../lib/player', __FILE__)
 require File.expand_path('../lib/team',   __FILE__)
 
-
-
-
-class InputPin
-  # lock_timeframe is used to lock only this input for consecutive press events, while glock_timeframe locks the inputs globally for given seconds
-  attr_reader :pin, :pressed_value, :lock_timeframe, :locked, :locked_at
-
-  def initialize(pin, opts)
-    @pin            = pin
-    @lock_timeframe = opts.fetch(:lock_timeframe, 0)
-    @pressed_value  = opts.fetch(:pressed_value, 0)
-  end
-
-  # TODO refactor this shit
-  def locked?
-    if locked
-      if locked_at + lock_timeframe >= Time.now
-        true
-      else
-        false
-      end
-    else
-      false
-    end
-  end
-
-  def lock
-    @locked_at = Time.now
-    @locked = true
-  end
-
-  def unlock
-    @locked = false
-  end
-end
-
-
-
-
 class Table
   # TODO much of these constants should go in a configuration file
-  MAX_GOALS    = 4
+  MAX_GOALS    = 8
   PLAYERS      = 4
-  GOAL_DELAY   = 2
+  GOAL_DELAY   = 3
   DELAY        = 0.002
   SERIAL_DELAY = 0.02
   GOLDEN_GOAL  = false
@@ -71,6 +30,7 @@ class Table
   MATCH_END_SOUND   = {:name => 'media/match_end.wav'    , :duration => 1}
   WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1}
   WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1}
+  PLAYER_REGISTETED = {:name => 'media/beep-7.wav',        :duration => 1}
   IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
 
 
@@ -161,17 +121,16 @@ class Table
   end
 
   def get_player(player)
-    if @serial.serialDataAvail > 0
-      while @serial.serialDataAvail > 0
-        @serialBuffer += @serial.serialGetchar.chr
-        sleep SERIAL_DELAY
-      end
-      if @serialBuffer.size > 0
-        code = sanitizeSerialBufferString
-        debug "#{player}: #{code}"
-        send "#{player}=", Player.new(code)
-        @serialBuffer = ''
-      end
+    while @serial.serialDataAvail > 0
+      @serialBuffer += @serial.serialGetchar.chr
+      sleep SERIAL_DELAY
+    end
+    if @serialBuffer.size > 0
+      code = sanitizeSerialBufferString
+      debug "#{player}: #{code}"
+      send "#{player}=", Player.new(code)
+      @serialBuffer = ''
+      play_sound PLAYER_REGISTETED
     end
   end
 
