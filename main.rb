@@ -1,9 +1,9 @@
 require 'wiringpi'
 require 'omxplayer'
 
-require File.expand_path('../lib/input_pin',   __FILE__)
 require File.expand_path('../lib/player', __FILE__)
 require File.expand_path('../lib/team',   __FILE__)
+require File.expand_path('../lib/input_pin',   __FILE__)
 
 class Table
   # TODO much of these constants should go in a configuration file
@@ -105,6 +105,7 @@ class Table
   end
 
   def register_players
+    set_state :registration
     if state_registration?
       clear_teams_and_players
       debug 'register players'
