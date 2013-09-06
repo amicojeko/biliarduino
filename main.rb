@@ -1,6 +1,7 @@
 require 'wiringpi'
 require 'omxplayer'
 
+require File.expand_path('../lib/input_pin',   __FILE__)
 require File.expand_path('../lib/player', __FILE__)
 require File.expand_path('../lib/team',   __FILE__)
 
