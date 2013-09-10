@@ -1,18 +1,18 @@
 require 'wiringpi'
 require 'omxplayer'
 
+require File.expand_path('../lib/rfid', __FILE__)
 require File.expand_path('../lib/player', __FILE__)
 require File.expand_path('../lib/team',   __FILE__)
 require File.expand_path('../lib/input_pin',   __FILE__)
 
 class Table
   # TODO much of these constants should go in a configuration file
-  MAX_GOALS    = 8
+  MAX_GOALS    = 3
   PLAYERS      = 4
   GOAL_DELAY   = 3
   DELAY        = 0.002
-  SERIAL_DELAY = 0.02
-  GOLDEN_GOAL  = false
+  GOLDEN_GOAL  = true
   OUTPUT_PINS  = {led: 7} # TODO the only output pin used now is for debugging glocked input state
   LED_STATES   = {:on => 1, :off => 0}
   STATES       = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
@@ -43,8 +43,8 @@ class Table
   def initialize
     @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
     @omx   = Omxplayer.instance
+    @rfid  = RfidReader.new
     @teams = []
-    init_serial
     init_inputs
     init_outputs
     unglock
@@ -105,14 +105,13 @@ class Table
   end
 
   def register_players
-    set_state :registration
     if state_registration?
       clear_teams_and_players
       debug 'register players'
       play_sound REGISTER_SOUND
       PLAYERS.times do |n|
         debug "player #{n}:"
-        play_sound :name => "media/player_#{n}.wav", :duration => 2 # TODO extract constants for these sounds
+        play_sound :name => "media/player_#{n}.wav", :duration => 1 # TODO extract constants for these sounds
         player = "player_#{n}"
         get_player player until send(player)
       end
@@ -123,17 +122,10 @@ class Table
   end
 
   def get_player(player)
-    while @serial.serialDataAvail > 0
-      @serialBuffer += @serial.serialGetchar.chr
-      sleep SERIAL_DELAY
-    end
-    if @serialBuffer.size > 0
-      code = sanitizeSerialBufferString
+      code = @rfid.read
       debug "#{player}: #{code}"
       send "#{player}=", Player.new(code)
-      @serialBuffer = ''
       play_sound PLAYER_REGISTETED
-    end
   end
 
   def increase_score(team)
@@ -142,9 +134,17 @@ class Table
     debug "team #{team.name} score: #{team.score}"
     play_sound self.class.const_get("GOAL_SOUND_#{team.name}")
     if team.score >= MAX_GOALS
-      finalize_match team
+      unless GOLDEN_GOAL
+        finalize_match team
+      else
+        finalize_match(team) if team.score >= other_team(team).score + 2
+      end
     end
     unglock
+  end
+
+  def other_team(team)
+    teams.detect {|t| t.id != team.id}
   end
 
   def start_match
@@ -163,11 +163,6 @@ class Table
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
       set_state :idle
     end
-  end
-
-  def init_serial
-    @serial = WiringPi::Serial.new('/dev/ttyAMA0',9600)
-    @serialBuffer = ''
   end
 
   def read_pins
@@ -274,14 +269,6 @@ class Table
     @say_pid = fork { exec 'espeak "' + text + '"'}
   end
 
-  # TODO this is rather crappy
-  def sanitizeSerialBufferString
-    begin
-      @serialBuffer.split("\u0002")[1].split("\u0003")[0]
-    rescue
-      raise "could not read data correctly from serial buffer"
-    end
-  end
 end
 
 t = Table.new
