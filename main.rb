@@ -33,7 +33,7 @@ class Table
   MATCH_END_SOUND   = {:name => 'media/match_end.wav'    , :duration => 1}
   WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1}
   WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1}
-  PLAYER_REGISTETED = {:name => 'media/beep-7.wav',        :duration => 1}
+  PLAYER_REGISTERED = {:name => 'media/beep-7.wav',        :duration => 1}
   SKIP_REGISTRATION = {:name => 'media/beep-7.wav',        :duration => 1}
   IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
 
@@ -127,17 +127,17 @@ class Table
 
   def get_player(player)
     debug "waiting for #{player}"
-    data = RfidReader.read do
+    serial = RfidReader.open do
       read_pins
       check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => SKIP_REGISTRATION do |pin|
         4.times {|n| send "player_#{n}=", n}
         set_state :start_match
         return
-      end.data
+      end
     end
-    debug "#{player}: #{data}"
-    send "#{player}=", Player.new(data)
-    play_sound PLAYER_REGISTETED
+    debug "#{player}: #{serial.reading}"
+    send "#{player}=", Player.new(serial.reading)
+    play_sound PLAYER_REGISTERED
   end
 
   def increase_score(team)

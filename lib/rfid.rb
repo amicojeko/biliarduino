@@ -1,7 +1,8 @@
 require "serialport"
 
 # USAGE:
-# p RfidReader.open(port_str, baud_rate, data_bits, stop_bits, parity) { # some extra code}
+# serial = RfidReader.open(port_str, baud_rate, data_bits, stop_bits, parity) { # some extra code}
+# p serial.reading
 
 class RfidReader
   attr_accessor :data
@@ -11,12 +12,12 @@ class RfidReader
   end
 
   def initialize(opts, &block)
-    sleeptime = opts.fetch(:sleeptime], 0.2)
-    baud_rate = opts.fetch(:baud_rate], 9600)
-    data_bits = opts.fetch(:data_bits], 8)
-    stop_bits = opts.fetch(:stop_bits], 1)
-    port_str  = opts.fetch(:port_str] , '/dev/ttyAMA0')
-    parity    = opts.fetch(:parity]   , SerialPort::NONE)
+    sleeptime = opts.fetch(:sleeptime, 0.2)
+    baud_rate = opts.fetch(:baud_rate, 9600)
+    data_bits = opts.fetch(:data_bits, 8)
+    stop_bits = opts.fetch(:stop_bits, 1)
+    port_str  = opts.fetch(:port_str,  '/dev/ttyAMA0')
+    parity    = opts.fetch(:parity,    SerialPort::NONE)
 
     SerialPort.open port_str, baud_rate, data_bits, stop_bits, parity do |port|
       port.sync = false
@@ -27,18 +28,17 @@ class RfidReader
   end
 
   def read(port, sleeptime, &block)
-    reading = ''
     loop do
       yield block if block_given?
       if i = port.gets
         reading = i.force_encoding('UTF-8').split("\x02")[1].split("\x03")[0] rescue ''
         if reading.size == 12
+          self.reading = reading
           port.flush
-          self.data = reading
           return
         end
       end
-      sleep @sleeptime
+      sleep sleeptime
     end
   end
 end
