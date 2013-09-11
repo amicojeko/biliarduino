@@ -1,16 +1,16 @@
 require 'wiringpi'
 require 'omxplayer'
 
-require File.expand_path('../lib/rfid', __FILE__)
-require File.expand_path('../lib/player', __FILE__)
-require File.expand_path('../lib/team',   __FILE__)
-require File.expand_path('../lib/input_pin',   __FILE__)
+
+Dir['../lib/*.rb'].each do |file|
+  require File.expand_path file, __FILE__
+end
 
 $debug = true if ARGV.delete('-d')
 
 class Table
   # TODO much of these constants should go in a configuration file
-  MAX_GOALS    = 8 
+  MAX_GOALS    = 8
   PLAYERS      = 4
   GOAL_DELAY   = 3
   DELAY        = 0.002
@@ -45,7 +45,6 @@ class Table
   def initialize
     @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
     @omx   = Omxplayer.instance
-    @rfid  = RfidReader.new
     @teams = []
     init_inputs
     init_outputs
@@ -124,7 +123,7 @@ class Table
   end
 
   def get_player(player)
-      code = @rfid.read
+      code = RfidReader.read
       debug "#{player}: #{code}"
       send "#{player}=", Player.new(code)
       play_sound PLAYER_REGISTETED
@@ -173,8 +172,8 @@ class Table
   end
 
   def init_inputs
-    INPUT_PINS.values.each { |pin| 
-        gpio.mode(pin.pin, INPUT) 
+    INPUT_PINS.values.each { |pin|
+        gpio.mode(pin.pin, INPUT)
         gpio.write(pin.pin, 0)
     }
   end
