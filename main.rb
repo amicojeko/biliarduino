@@ -6,9 +6,11 @@ require File.expand_path('../lib/player', __FILE__)
 require File.expand_path('../lib/team',   __FILE__)
 require File.expand_path('../lib/input_pin',   __FILE__)
 
+$debug = true if ARGV.delete('-d')
+
 class Table
   # TODO much of these constants should go in a configuration file
-  MAX_GOALS    = 3
+  MAX_GOALS    = 8 
   PLAYERS      = 4
   GOAL_DELAY   = 3
   DELAY        = 0.002
@@ -167,11 +169,14 @@ class Table
 
   def read_pins
     @buttonstate = gpio.readAll
-    # p @buttonstate
+    debug @buttonstate
   end
 
   def init_inputs
-    INPUT_PINS.values.each { |pin| gpio.mode(pin.pin, INPUT) }
+    INPUT_PINS.values.each { |pin| 
+        gpio.mode(pin.pin, INPUT) 
+        gpio.write(pin.pin, 0)
+    }
   end
 
   def init_outputs
@@ -238,7 +243,7 @@ class Table
   private
 
   def debug(message)
-    p message
+    p message if $debug
   end
 
   # FIXME prende un parametro, ma non viene usato
