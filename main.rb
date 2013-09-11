@@ -11,7 +11,7 @@ $debug = true if ARGV.delete('-d')
 class Table
   # TODO much of these constants should go in a configuration file
   MAX_GOALS    = 8
-  PLAYERS      = 4
+  PLAYERS      = 4 # when 2 players match you just register twice
   GOAL_DELAY   = 3
   DELAY        = 0.002
   GOLDEN_GOAL  = true
@@ -26,8 +26,8 @@ class Table
 
   IDLE_SOUND        = {:name => 'media/idle.wav'         , :duration => 2}
   START_SOUND       = {:name => 'media/horn.mp3'         , :duration => 1}
-  GOAL_SOUND_A      = {:name => 'media/goal_team_a.wav'  , :duration => 1}
-  GOAL_SOUND_B      = {:name => 'media/goal_team_b.wav'  , :duration => 1}
+  GOAL_SOUND_A      = {:name => 'media/goal_team_a.wav'  , :duration => 1} # custom team
+  GOAL_SOUND_B      = {:name => 'media/goal_team_b.wav'  , :duration => 1} # custom team
   REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 2}
   MATCH_START_SOUND = {:name => 'media/match_start.wav'  , :duration => 1}
   MATCH_END_SOUND   = {:name => 'media/match_end.wav'    , :duration => 1}
