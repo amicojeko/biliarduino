@@ -127,16 +127,16 @@ class Table
 
   def get_player(player)
     debug "waiting for #{player}"
-    code = RfidReader.read do
+    data = RfidReader.read do
       read_pins
       check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => SKIP_REGISTRATION do |pin|
         4.times {|n| send "player_#{n}=", n}
         set_state :start_match
         return
-      end
+      end.data
     end
-    debug "#{player}: #{code}"
-    send "#{player}=", Player.new(code)
+    debug "#{player}: #{data}"
+    send "#{player}=", Player.new(data)
     play_sound PLAYER_REGISTETED
   end
 
