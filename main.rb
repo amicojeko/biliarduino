@@ -2,8 +2,8 @@ require 'wiringpi'
 require 'omxplayer'
 
 
-Dir['../lib/*.rb'].each do |file|
-  require File.expand_path file, __FILE__
+Dir['lib/*.rb'].each do |file|
+  require File.expand_path "../#{file}", __FILE__
 end
 
 $debug = true if ARGV.delete('-d')
@@ -34,6 +34,7 @@ class Table
   WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1}
   WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1}
   PLAYER_REGISTETED = {:name => 'media/beep-7.wav',        :duration => 1}
+  SKIP_REGISTRATION = {:name => 'media/beep-7.wav',        :duration => 1}
   IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
 
 
@@ -79,16 +80,17 @@ class Table
   def check_input_pins
     check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => START_SOUND, :on_state => :idle do |pin|
       set_state :registration
+      unglock
     end
     check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :on_state => :match do |pin|
       unless pin.locked?
-        increase_score(teams[0])
+        increase_score teams[0]
         pin.lock
       end
     end
     check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :on_state => :match do |pin|
       unless pin.locked?
-        increase_score(teams[1])
+        increase_score teams[1]
         pin.lock
       end
     end
@@ -111,10 +113,11 @@ class Table
       debug 'register players'
       play_sound REGISTER_SOUND
       PLAYERS.times do |n|
-        debug "player #{n}:"
-        play_sound :name => "media/player_#{n}.wav", :duration => 1 # TODO extract constants for these sounds
         player = "player_#{n}"
-        get_player player until send(player)
+        unless send(player)
+          play_sound :name => "media/player_#{n}.wav", :duration => 1 # TODO extract constants for these sounds
+          get_player player until send(player)
+        end
       end
       teams << Team.new(:a)
       teams << Team.new(:b)
@@ -123,10 +126,18 @@ class Table
   end
 
   def get_player(player)
-      code = RfidReader.read
-      debug "#{player}: #{code}"
-      send "#{player}=", Player.new(code)
-      play_sound PLAYER_REGISTETED
+    debug "waiting for #{player}"
+    code = RfidReader.read do
+      read_pins
+      check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => SKIP_REGISTRATION do |pin|
+        4.times {|n| send "player_#{n}=", n}
+        set_state :start_match
+        return
+      end
+    end
+    debug "#{player}: #{code}"
+    send "#{player}=", Player.new(code)
+    play_sound PLAYER_REGISTETED
   end
 
   def increase_score(team)
@@ -150,7 +161,6 @@ class Table
 
   def start_match
     if state_start_match?
-      debug "match has started"
       play_sound MATCH_START_SOUND
       set_state :match
     end
@@ -158,7 +168,6 @@ class Table
 
   def end_match
     if state_end_match?
-      debug "match is over"
       play_sound MATCH_END_SOUND
       # TODO: dare il risultato finale
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
@@ -168,26 +177,27 @@ class Table
 
   def read_pins
     @buttonstate = gpio.readAll
-    debug @buttonstate
+    # debug @buttonstate
   end
 
   def init_inputs
-    INPUT_PINS.values.each { |pin|
-        gpio.mode(pin.pin, INPUT)
-        gpio.write(pin.pin, 0)
-    }
+    INPUT_PINS.values.each do |pin|
+      gpio.mode  pin.pin, INPUT
+      gpio.write pin.pin, 0
+    end
   end
 
   def init_outputs
-    OUTPUT_PINS.values.each {|pin| gpio.mode(pin, OUTPUT) }
+    OUTPUT_PINS.values.each {|pin| gpio.mode pin, OUTPUT }
   end
 
+  # it's our responsibility to unglock the pins
   def check_pressed(pin, opts)
     if pin_pressed? pin
       # true when state is missing (callback happens always), or is correct for this event
       if !opts[:on_state] or opts[:on_state] && send("state_#{opts[:on_state]}?")
         glock
-        debug opts[:message]
+        debug opts[:message] || "#{pin} pressed"
         play_sound opts[:sound] if opts[:sound]
         yield pin if block_given?
       end
@@ -260,7 +270,7 @@ class Table
 
   def play_sound(sound)
     omx.open sound[:name]
-    sleep sound[:duration] || 0
+    sleep sound[:duration] or 0
   end
 
   def play_video(video)
@@ -272,7 +282,6 @@ class Table
     # @say_pid = fork { exec 'echo "' + text + '" | festival --tts'}
     @say_pid = fork { exec 'espeak "' + text + '"'}
   end
-
 end
 
 t = Table.new
