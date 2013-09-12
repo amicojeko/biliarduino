@@ -39,7 +39,7 @@ class Table
 
 
   attr_reader   :gpio, :omx
-  attr_accessor :state, :teams, :last_goal_at
+  attr_accessor :state, :teams, :buttonstate
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
 
 
@@ -176,8 +176,8 @@ class Table
   end
 
   def read_pins
-    @buttonstate = gpio.readAll
-    # debug @buttonstate
+    self.buttonstate = gpio.readAll
+    debug buttonstate[0]
   end
 
   def init_inputs
@@ -206,12 +206,12 @@ class Table
 
   def any_pin_pressed?
     INPUT_PINS.values.inject false do |bool, pin|
-      bool ||= @buttonstate[pin.pin] == pin.pressed_value
+      bool ||= buttonstate[pin.pin] == pin.pressed_value
     end
   end
 
   def pin_pressed?(pin)
-    !glocked? and @buttonstate[pin.pin] == pin.pressed_value
+    !glocked? and buttonstate[pin.pin] == pin.pressed_value
   end
 
   def reset_input_pins
