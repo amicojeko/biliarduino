@@ -1,10 +1,11 @@
 class Player
   ROLES = [:defense, :attack]
-  attr_accessor :id, :role
+  attr_accessor :code, :role
 
-  def initialize(id, role=:defense)
-    @id   = id
+  def initialize(code, role=:defense)
+    @code = code
     @role = role
+    @name = code.to_s.upcase # TODO once we have a table, let the users edit the name
     validate_role
   end
 
