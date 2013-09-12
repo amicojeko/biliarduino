@@ -1,13 +1,11 @@
 class Team
-  attr_accessor :id, :score, :name
+  attr_accessor :code, :score, :name
 
-  #TODO: aggiungere l'attributo "name" al team
-
-  def initialize(id)
-    @id     = id
+  def initialize(code)
     @score  = 0
+    @code   = code
     @winner = false
-    @name   = id.to_s.upcase
+    @name   = code.to_s.upcase # TODO once we have a table, let the users edit the name
   end
 
   def set_winner

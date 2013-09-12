@@ -31,8 +31,8 @@ class Table
   REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 2}
   MATCH_START_SOUND = {:name => 'media/match_start.wav'  , :duration => 1}
   MATCH_END_SOUND   = {:name => 'media/match_end.wav'    , :duration => 1}
-  WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1}
-  WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1}
+  WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1} # custom team
+  WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1} # custom team
   PLAYER_REGISTERED = {:name => 'media/beep-7.wav',        :duration => 1}
   SKIP_REGISTRATION = {:name => 'media/beep-7.wav',        :duration => 1}
   IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
@@ -143,7 +143,7 @@ class Table
   def increase_score(team)
     team.score += 1
     get_snapshot team
-    debug "team #{team.name} score: #{team.score}"
+    debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
     play_sound self.class.const_get("GOAL_SOUND_#{team.name}")
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
@@ -156,7 +156,7 @@ class Table
   end
 
   def other_team(team)
-    teams.detect {|t| t.id != team.id}
+    teams.detect {|t| t.code != team.code}
   end
 
   def start_match
@@ -257,7 +257,7 @@ class Table
 
   # FIXME prende un parametro, ma non viene usato
   def get_snapshot(team)
-    camera = team.id
+    camera = team.code
     fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam_#{Time.now.to_i}.jpg'"}
   end
 
