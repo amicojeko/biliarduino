@@ -177,7 +177,6 @@ class Table
 
   def read_pins
     self.buttonstate = gpio.readAll
-    debug buttonstate[0]
   end
 
   def init_inputs
