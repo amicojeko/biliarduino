@@ -1,5 +1,5 @@
 class Sound
-	def initialize(args)
+	def initialize
 		@goal = Dir.glob("./media/goal*.wav")
 		@supporters = Dir.glob("./media/goal*.wav")
 	end
