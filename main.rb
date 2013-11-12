@@ -38,6 +38,8 @@ class Table
   IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
 
 
+
+
   attr_reader   :gpio, :omx
   attr_accessor :state, :teams, :buttonstate
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
@@ -46,6 +48,7 @@ class Table
   def initialize
     @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
     @omx   = Omxplayer.instance
+    @sound = Sound.new 
     @teams = []
     init_inputs
     init_outputs
@@ -144,7 +147,8 @@ class Table
     team.score += 1
     get_snapshot team
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
-    play_sound self.class.const_get("GOAL_SOUND_#{team.name}")
+    # play_sound self.class.const_get("GOAL_SOUND_#{team.name}")
+    play_sound @sound.get_random_goal_sound
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
         finalize_match team
