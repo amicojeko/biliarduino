@@ -105,7 +105,7 @@ class Table
       # fixme: se mettiamo il video si incasina un po tutto (non riesco a sopparlo :) )
       # play_video IDLE_VIDEO
       debug_once "idle - please push start button"
-      play_sound IDLE_SOUND
+      @sound.play_idle_sound
       @started = true
     end
   end
@@ -114,11 +114,12 @@ class Table
     if state_registration?
       clear_teams_and_players
       debug 'register players'
-      play_sound REGISTER_SOUND
+      @sound.play_register_sound
       PLAYERS.times do |n|
         player = "player_#{n}"
         unless send(player)
-          play_sound :name => "media/player_#{n}.wav", :duration => 1 # TODO extract constants for these sounds
+          #play_sound :name => "media/player_#{n}.wav", :duration => 1 # TODO extract constants for these sounds
+          @sound.play_register_player_sound n
           get_player player until send(player)
         end
       end
@@ -145,10 +146,15 @@ class Table
 
   def increase_score(team)
     team.score += 1
-    get_snapshot team
+    # TODO: get a photo of the scoring team
+    # get_snapshot team
+
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
     # play_sound self.class.const_get("GOAL_SOUND_#{team.name}")
-    play_sound @sound.get_random_goal_sound
+    
+    @sound.play_goal_sound
+    
+
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
         finalize_match team
