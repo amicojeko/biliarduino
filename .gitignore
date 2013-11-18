@@ -1,0 +1,5 @@
+.DS_Store
+snapshots
+logs/*
+!logs/.gitignore
+fifo
