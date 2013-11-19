@@ -1,12 +1,13 @@
 require 'wiringpi'
 require 'omxplayer'
 
-
 Dir['lib/*.rb'].each do |file|
   require File.expand_path "../#{file}", __FILE__
 end
 
 $debug = true if ARGV.delete('-d')
+
+
 
 class Table
   # TODO much of these constants should go in a configuration file
@@ -38,17 +39,18 @@ class Table
   IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
 
 
-
-
   attr_reader   :gpio
   attr_accessor :state, :teams, :buttonstate, :sound
+
+
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
 
 
   def initialize
-    @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
-    @sound = Sound.new
-    @teams = []
+    @gpio   = WiringPi::GPIO.new(WPI_MODE_PINS)
+    @sound  = Sound.new
+    @social = Social.new
+    @teams  = []
     init_inputs
     init_outputs
     unglock
@@ -113,7 +115,6 @@ class Table
     if state_registration?
       clear_teams_and_players
       debug 'register players'
-      sound.play_register_sound
       PLAYERS.times do |n|
         player = "player_#{n}"
         unless send(player)
@@ -150,10 +151,7 @@ class Table
 
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
     # play_sound self.class.const_get("GOAL_SOUND_#{team.name}")
-
     sound.play_goal_sound
-
-
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
         finalize_match team
@@ -171,6 +169,7 @@ class Table
   def start_match
     if state_start_match?
       play_sound MATCH_START_SOUND
+      @social.tweet "Another game has started!"
       set_state :match
     end
   end
@@ -180,6 +179,7 @@ class Table
       play_sound MATCH_END_SOUND
       # TODO: dare il risultato finale
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
+      @social.tweet "The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
       set_state :idle
     end
   end

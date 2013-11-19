@@ -8,6 +8,12 @@ describe Player do
 
   it { should be_a Player }
 
+  it 'raise an error when role is not valid' do
+    expect do
+      Player.new(id, :pivot)
+    end.to raise_error
+  end
+
   [:code, :role, :name].each do |accessor|
     it "should have '#{accessor}' reader" do
       should respond_to accessor

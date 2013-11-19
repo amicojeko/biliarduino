@@ -9,6 +9,8 @@ GEM
   specs:
     coderay (1.0.9)
     diff-lcs (1.2.4)
+    faraday (0.8.7)
+      multipart-post (~> 1.1)
     ffi (1.9.0)
     formatador (0.2.4)
     guard (1.8.2)
@@ -26,6 +28,8 @@ GEM
       rb-kqueue (>= 0.2)
     lumberjack (1.0.4)
     method_source (0.8.2)
+    multi_json (1.8.2)
+    multipart-post (1.2.0)
     omxplayer (0.4.1)
     pry (0.9.12.2)
       coderay (~> 1.0.5)
@@ -45,8 +49,13 @@ GEM
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.3)
     serialport (1.1.0)
+    simple_oauth (0.2.0)
     slop (3.4.6)
     thor (0.18.1)
+    twitter (4.8.1)
+      faraday (~> 0.8, < 0.10)
+      multi_json (~> 1.0)
+      simple_oauth (~> 0.2)
 
 PLATFORMS
   ruby
@@ -57,4 +66,5 @@ DEPENDENCIES
   rb-fsevent (~> 0.9)
   rspec
   serialport
+  twitter
   wiringpi_kb_adapter!
