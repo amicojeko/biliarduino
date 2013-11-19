@@ -8,5 +8,6 @@ group :development, :test do
   gem 'rb-fsevent', '~> 0.9'
   gem 'wiringpi_kb_adapter', :git => 'https://github.com/spaghetticode/wiringpi_kb_adapter'
   gem 'serialport'
+  gem 'twitter'
 end
 
