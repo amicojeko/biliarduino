@@ -37,11 +37,12 @@ class Sound
 		play_sound @supporters.sample
 	end
 
-	def play_register_player_sound
-		
+	def play_register_player_sound(n)
+		play_sound "./media/player_#{n}.wav"
 	end
 
 	def stop_backgroud_music
+
 	end
 
 
