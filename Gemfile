@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 ruby '2.0.0'
 
 gem 'omxplayer'
+gem 'twitter'
 
 group :development, :test do
   gem 'rspec'

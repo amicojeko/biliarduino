@@ -1,6 +1,8 @@
 class Player
   ROLES = [:defense, :attack]
+
   attr_accessor :code, :role, :name
+
 
   def initialize(code, role=:defense)
     @code = code

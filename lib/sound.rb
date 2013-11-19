@@ -1,6 +1,7 @@
 require 'omxplayer'
 
 class Sound
+
   IDLE_SOUND        = {:name => 'media/idle.wav'         , :duration => 2}
   START_SOUND       = {:name => 'media/horn.mp3'         , :duration => 1}
   GOAL_SOUND_A      = {:name => 'media/goal_team_a.wav'  , :duration => 1} # custom team
@@ -13,8 +14,9 @@ class Sound
   PLAYER_REGISTERED = {:name => 'media/beep-7.wav',        :duration => 1}
   SKIP_REGISTRATION = {:name => 'media/beep-7.wav',        :duration => 1}
 
+
 	def initialize
-		@omx  = Omxplayer.instance
+		@omx   = Omxplayer.instance
 		@goal = Dir.glob("./media/goal*.wav")
 		@supporters = Dir.glob("./media/goal*.wav")
 	end
@@ -35,7 +37,8 @@ class Sound
 		play_sound @supporters.sample
 	end
 
-	def play_register_player_sound
+	def play_register_player_sound(n)
+		play_sound "./media/player_#{n}.wav"
 	end
 
 	def stop_backgroud_music
