@@ -1,7 +1,7 @@
 require 'twitter'
 require 'yaml'
 
-CONFIG = YAML.load_file File.expand_path('../config.yml', __FILE__)
+CONFIG = YAML.load_file File.expand_path('../../config.yml', __FILE__)
 
 Twitter.configure do |config|
   config.consumer_key       = CONFIG['twitter_key']
