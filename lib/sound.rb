@@ -42,14 +42,13 @@ class Sound
 	end
 
 	def stop_backgroud_music
-
 	end
 
 
 	private
 
 	def play_sound(sound)
-    	@omx.open sound
-    	sleep 5
-  	end
+    omx.open sound
+    sleep 5
+  end
 end

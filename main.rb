@@ -7,6 +7,8 @@ end
 
 $debug = true if ARGV.delete('-d')
 
+
+
 class Table
   # TODO much of these constants should go in a configuration file
   MAX_GOALS    = 8
@@ -37,19 +39,18 @@ class Table
   IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
 
 
+  attr_reader   :gpio
+  attr_accessor :state, :teams, :buttonstate, :sound
 
 
-  attr_reader   :gpio, :omx
-  attr_accessor :state, :teams, :buttonstate
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
 
 
   def initialize
-    @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
-    @omx   = Omxplayer.instance
-    @sound = Sound.new 
+    @gpio   = WiringPi::GPIO.new(WPI_MODE_PINS)
+    @sound  = Sound.new
     @social = Social.new
-    @teams = []
+    @teams  = []
     init_inputs
     init_outputs
     unglock
@@ -105,7 +106,7 @@ class Table
       # fixme: se mettiamo il video si incasina un po tutto (non riesco a sopparlo :) )
       # play_video IDLE_VIDEO
       debug_once "idle - please push start button"
-      @sound.play_idle_sound
+      sound.play_idle_sound
       @started = true
     end
   end
@@ -114,12 +115,11 @@ class Table
     if state_registration?
       clear_teams_and_players
       debug 'register players'
-      @sound.play_register_sound
       PLAYERS.times do |n|
         player = "player_#{n}"
         unless send(player)
           #play_sound :name => "media/player_#{n}.wav", :duration => 1 # TODO extract constants for these sounds
-          @sound.play_register_player_sound n
+          sound.play_register_player_sound n
           get_player player until send(player)
         end
       end
@@ -151,10 +151,7 @@ class Table
 
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
     # play_sound self.class.const_get("GOAL_SOUND_#{team.name}")
-    
-    @sound.play_goal_sound
-    
-
+    sound.play_goal_sound
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
         finalize_match team
