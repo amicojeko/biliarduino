@@ -1,6 +1,6 @@
 .DS_Store
 snapshots
-logs/*
-!logs/.gitignore
+log/*
+!log/.gitignore
 fifo
 config/*.yml
