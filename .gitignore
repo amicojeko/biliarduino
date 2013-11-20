@@ -2,3 +2,5 @@
 snapshots
 log/*
 !log/.gitignore
+fifo
+config/*.yml
