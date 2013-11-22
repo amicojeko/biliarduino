@@ -16,7 +16,7 @@ module Server
     # handle more matches at the same time doesn't add much overhead.
   end
 
-  def end_match(teams)
+  def close_match(teams)
     # puts to http://localhost:3000/match/:id.json
     # team1, team2 data
     # match is marked finished on the server
