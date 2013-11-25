@@ -39,9 +39,6 @@ class Sound
 	# 	play_sound supporters.sample
 	# end
 
-  # def stop_backgroud_music
-  # end
-
 	def play_register_player_sound(n)
 		play_sound "./media/player_#{n}.wav"
 	end
@@ -61,8 +58,13 @@ class Sound
 	private
 
 	def play_sound(sound)
+    stop_sound
     sound = {:name => sound, :duration => 5} if sound.is_a?(String)
     omx.open sound[:name]
     sleep sound[:duration]
+  end
+
+  def stop_sound
+    system 'killall omxplayer'
   end
 end
