@@ -14,6 +14,10 @@ class Sound
   PLAYER_REGISTERED = {:name => 'media/beep-7.wav',        :duration => 1}
   SKIP_REGISTRATION = {:name => 'media/beep-7.wav',        :duration => 1}
 
+<<<<<<< HEAD
+=======
+  attr_reader :omx, :goal, :supporters
+>>>>>>> jeko/master
 
 	def initialize
 		@omx   = Omxplayer.instance
@@ -30,11 +34,11 @@ class Sound
 	end
 
 	def play_goal_sound
-		play_sound @goal.sample
+		play_sound goal.sample
 	end
 
 	def play_background_music
-		play_sound @supporters.sample
+		play_sound supporters.sample
 	end
 
 	def play_register_player_sound(n)
@@ -43,7 +47,6 @@ class Sound
 
 	def stop_backgroud_music
 	end
-
 
 	private
 
