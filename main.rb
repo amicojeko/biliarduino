@@ -25,25 +25,21 @@ class Table
     start:  InputPin.new(4, :pressed_value => 0) # no locking here
   }
 
-  IDLE_SOUND        = {:name => 'media/idle.wav'         , :duration => 2}
+
+  # TODO put all this stuff in the sound library
   START_SOUND       = {:name => 'media/horn.mp3'         , :duration => 1}
-  GOAL_SOUND_A      = {:name => 'media/goal_team_a.wav'  , :duration => 1} # custom team
-  GOAL_SOUND_B      = {:name => 'media/goal_team_b.wav'  , :duration => 1} # custom team
-  REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 2}
-  MATCH_START_SOUND = {:name => 'media/match_start.wav'  , :duration => 1}
-  MATCH_END_SOUND   = {:name => 'media/match_end.wav'    , :duration => 1}
   WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1} # custom team
   WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1} # custom team
   PLAYER_REGISTERED = {:name => 'media/beep-7.wav',        :duration => 1}
   SKIP_REGISTRATION = {:name => 'media/beep-7.wav',        :duration => 1}
-  IDLE_VIDEO        = 'media/Holly\ e\ Benji.flv'
 
 
-  attr_reader   :gpio
-  attr_accessor :state, :teams, :buttonstate, :sound
 
+  attr_reader   :gpio, :sound, :social
+  attr_accessor :state, :teams, :buttonstate
 
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
+
 
 
   def initialize
@@ -103,8 +99,6 @@ class Table
 
   def wait_for_start
     if state_idle? and !@started
-      # fixme: se mettiamo il video si incasina un po tutto (non riesco a sopparlo :) )
-      # play_video IDLE_VIDEO
       debug_once "idle - please push start button"
       sound.play_idle_sound
       @started = true
@@ -118,8 +112,7 @@ class Table
       PLAYERS.times do |n|
         player = "player_#{n}"
         unless send(player)
-          #play_sound :name => "media/player_#{n}.wav", :duration => 1 # TODO extract constants for these sounds
-          sound.play_register_player_sound n
+          sound.play_register_player_sound(n)
           get_player player until send(player)
         end
       end
@@ -150,8 +143,7 @@ class Table
     # get_snapshot team
 
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
-    # play_sound self.class.const_get("GOAL_SOUND_#{team.name}")
-    sound.play_goal_sound
+    sound.play_random_goal
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
         finalize_match team
@@ -168,18 +160,17 @@ class Table
 
   def start_match
     if state_start_match?
-      play_sound MATCH_START_SOUND
-      @social.tweet "Another game has started!"
+      sound.match_start
+      social.tweet 'A new match has started!'
       set_state :match
     end
   end
 
   def end_match
     if state_end_match?
-      play_sound MATCH_END_SOUND
-      # TODO: dare il risultato finale
+      sound.match_end
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
-      @social.tweet "The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
+      social.tweet "The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
       set_state :idle
     end
   end
@@ -276,9 +267,8 @@ class Table
     set_state :end_match
   end
 
-  def play_sound(sound)
-    omx.open sound[:name]
-    sleep sound[:duration] or 0
+  def play_sound(tune)
+    sound.play tune
   end
 
   def play_video(video)
