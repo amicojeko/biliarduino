@@ -1,6 +1,6 @@
 require 'yaml'
 
-SERVER_CONFIG = YAML.load_file('../../config/server.yml', __FILE__)
+SERVER_CONFIG = YAML.load_file File.expand_path('../../config/server.yml', __FILE__)
 
 module Server
   extend self
