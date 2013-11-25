@@ -11,7 +11,7 @@ $debug = true if ARGV.delete('-d')
 
 class Table
   # TODO much of these constants should go in a configuration file
-  MAX_GOALS    = 8
+  MAX_GOALS    = 3 # 8
   PLAYERS      = 4 # when 2 players match you just register twice
   GOAL_DELAY   = 3
   DELAY        = 0.002
@@ -193,6 +193,7 @@ class Table
   # it's our responsibility to unglock the pins
   def check_pressed(pin, opts)
     if pin_pressed? pin
+
       # true when state is missing (callback happens always), or is correct for this event
       if !opts[:on_state] or opts[:on_state] && send("state_#{opts[:on_state]}?")
         glock

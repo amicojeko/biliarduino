@@ -3,7 +3,7 @@ require 'yaml'
 
 SOCIAL_CONFIG = YAML.load_file File.expand_path('../../config/social.yml', __FILE__)
 
-Twitter::Streaming::Client.new do |config|
+Twitter.configure do |config|
   config.consumer_key       = SOCIAL_CONFIG['twitter_key']
   config.consumer_secret    = SOCIAL_CONFIG['twitter_secret']
   config.oauth_token        = SOCIAL_CONFIG['twitter_oauth_token']
@@ -12,6 +12,11 @@ end
 
 class Social
 	def tweet(message)
-		Twitter.update message
+    begin
+		  Twitter.update message
+    rescue => e
+      puts "TWITTER ERROR #{e.message}"
+      puts e.backtrace
+    end
 	end
 end
