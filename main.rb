@@ -161,7 +161,7 @@ class Table
   def start_match
     if state_start_match?
       sound.match_start
-      social.tweet 'A new match has started!'
+      social.tweet "A new match has started at #{Time.now}!"
       set_state :match
     end
   end
@@ -170,7 +170,7 @@ class Table
     if state_end_match?
       sound.match_end
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
-      social.tweet "The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
+      social.tweet "The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score} at #{Time.now}!"
       set_state :idle
     end
   end
