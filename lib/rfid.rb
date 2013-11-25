@@ -5,7 +5,7 @@ require "serialport"
 # p serial.reading
 
 class RfidReader
-  attr_accessor :data
+  attr_accessor :data, :reading
 
   def self.open(opts={}, &block)
     new(opts, &block)
