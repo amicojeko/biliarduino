@@ -154,6 +154,7 @@ class Table
 
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
     sound.play_random_goal
+    Server.update_match(teams)
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
         finalize_match team
@@ -180,6 +181,7 @@ class Table
   def end_match
     if state_end_match?
       sound.match_end
+      Server.close_match(teams)
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
       social.tweet "#{timestamp} The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
       set_state :idle
