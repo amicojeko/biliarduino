@@ -149,12 +149,9 @@ class Table
 
   def increase_score(team)
     team.score += 1
-    # TODO: get a photo of the scoring team
-    # get_snapshot team
-
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
-    sound.play_random_goal
     Server.update_match(teams)
+    sound.play_random_goal
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
         finalize_match team
@@ -171,17 +168,17 @@ class Table
 
   def start_match
     if state_start_match?
-      sound.match_start
       social.tweet "#{timestamp} A new match has started!" # TODO move to the server app
       set_state :match
       Server.start_match(teams)
+      sound.match_start
     end
   end
 
   def end_match
     if state_end_match?
-      sound.match_end
       Server.close_match(teams)
+      sound.match_end
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
       social.tweet "#{timestamp} The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
       set_state :idle
