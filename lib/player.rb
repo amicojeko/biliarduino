@@ -5,7 +5,7 @@ class Player
 
 
   def initialize(code, role=:defense)
-    @code = code
+    @code = code.rjust 12, '0'
     @role = role
     @name = code.to_s.upcase # TODO once we have a table, let the users edit the name
     validate_role

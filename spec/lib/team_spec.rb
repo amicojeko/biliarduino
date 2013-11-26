@@ -36,4 +36,21 @@ describe Team do
       expect { team.set_winner }.to change(team, :winner?).to true
     end
   end
+
+  describe '#add_player' do
+    it 'adds the player' do
+      player = double
+      team.add_player player
+      team.players.should include player
+    end
+  end
+
+  describe '#player_codes' do
+    it 'returns player codes' do
+      %w[123 456].each do |code|
+        team.add_player Player.new(code)
+      end
+      team.player_codes.should == %w[000000000123 000000000456]
+    end
+  end
 end

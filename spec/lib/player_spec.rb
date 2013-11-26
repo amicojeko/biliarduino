@@ -27,4 +27,9 @@ describe Player do
   it 'raise an error when role is not valid' do
     expect { Player.new(id, :pivot) }.to raise_error
   end
+
+  it 'pads code with zeros' do
+    player = Player.new('asd')
+    player.code.should == '000000000asd'
+  end
 end
