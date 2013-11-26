@@ -1,4 +1,5 @@
 require 'yaml'
+require 'httparty'
 
 SERVER_CONFIG = YAML.load_file File.expand_path('../../config/server.yml', __FILE__)
 
@@ -7,7 +8,7 @@ module Server
 
   def start_match(teams)
     payload = get_player_params(teams)
-    Httparty.post server_domain.join('matches'), payload
+    HTTParty.post domain.join('match').to_s, payload
     # posts to http://localhost:3000/matches.json
     # p1, p2, p3, p4 data
     # team1, team2 data
@@ -20,7 +21,7 @@ module Server
 
   def close_match(teams)
     payload = get_player_params(teams)
-    Httparty.put server_domain.join('matches/close'), payload
+    HTTParty.put domain.join('match/close').to_s, payload
     # puts to http://localhost:3000/match/:id.json
     # team1, team2 data
     # match is marked finished on the server
@@ -28,7 +29,7 @@ module Server
 
   def update_match(teams)
     payload = get_player_params(teams)
-    Httparty.put server_domain.join('matches/close'), payload
+    HTTParty.put domain.join('match/close'), payload
     # basically, same as end_match, but dones't mark match as finished
   end
 
@@ -42,6 +43,6 @@ module Server
   end
 
   def domain
-    "#{SERVER_CONFIG['protocol']}://#{SERVER_CONFIG['domain']}:#{SERVER_CONFIG['port'] || 80}"
+    Pathname.new "#{SERVER_CONFIG['protocol']}://#{SERVER_CONFIG['domain']}:#{SERVER_CONFIG['port'] || 80}"
   end
 end

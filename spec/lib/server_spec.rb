@@ -15,7 +15,7 @@ describe Server do
 
   describe '#domain' do
     it 'returns expected string' do
-      Server.domain.should == 'http://192.168.0.1:3000'
+      Server.domain.to_s.should == 'http://192.168.0.1:3000'
     end
   end
 
@@ -25,6 +25,17 @@ describe Server do
       %w[player_1 player_2 player_3 player_4].each do |key|
         hash.keys.should include key
       end
+    end
+  end
+
+  describe '#start_match' do
+    it 'posts to the server url' do
+      teams  = build_teams
+      domain = Pathname.new('http://fakeserver.com')
+      url    = "#{domain}/match"
+      Server.stub(:domain => domain)
+      FakeWeb.register_uri(:post, url, :body => '42', :status => ['200', 'OK']) # body is actually not used now
+      Server.start_match(teams).body.should == '42'
     end
   end
 end
