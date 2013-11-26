@@ -9,5 +9,5 @@ gem 'rspec'
 gem 'guard-rspec'
 gem 'rb-fsevent', '~> 0.9'
 # gem 'wiringpi_kb_adapter', :git => 'https://github.com/spaghetticode/wiringpi_kb_adapter'
-gem 'serialport' '1.1.0'
-
+gem 'serialport', '1.1.0'
+gem 'httparty'
