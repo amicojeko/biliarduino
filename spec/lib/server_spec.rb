@@ -15,7 +15,7 @@ describe Server do
 
   describe '#domain' do
     it 'returns expected string' do
-      Server.domain.to_s.should == 'http://192.168.0.1:3000'
+      Server.domain.to_s.should == 'http://192.168.16.156:3000'
     end
   end
 
