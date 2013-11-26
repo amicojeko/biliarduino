@@ -8,28 +8,18 @@ module Server
 
   def start_match(teams)
     payload = get_player_params(teams)
-    HTTParty.post domain.join('match').to_s, payload
-    # posts to http://localhost:3000/matches.json
-    # p1, p2, p3, p4 data
-    # team1, team2 data
-    # match is created, id is returned and must be stored.
-    # Now there is no need to handle more than 1 match at the same time, so
-    # we could go with a singular resource instead of the plural resources.
-    # Anyway this is not crystal clear, and starting with the capability to
-    # handle more matches at the same time doesn't add much overhead.
+    HTTParty.post match_url, body: payload
   end
 
   def close_match(teams)
     payload = get_player_params(teams)
-    HTTParty.put domain.join('match/close').to_s, payload
-    # puts to http://localhost:3000/match/:id.json
-    # team1, team2 data
+    HTTParty.put match_close_url, body: payload
     # match is marked finished on the server
   end
 
   def update_match(teams)
     payload = get_player_params(teams)
-    HTTParty.put domain.join('match/close'), payload
+    HTTParty.put match_url, body: payload
     # basically, same as end_match, but dones't mark match as finished
   end
 
@@ -40,6 +30,14 @@ module Server
       params["player_#{i+1}"] = code
     end
     params
+  end
+
+  def match_url
+    domain.join('match').to_s
+  end
+
+  def match_close_url
+    domain.join('match/close').to_s
   end
 
   def domain
