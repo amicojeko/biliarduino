@@ -3,5 +3,6 @@ snapshots
 log/*
 !log/.gitignore
 fifo
-config/*.yml
+config/server.yml
+config/social.yml
 media
