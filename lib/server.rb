@@ -12,13 +12,13 @@ module Server
   end
 
   def close_match(teams)
-    payload = get_player_params(teams)
+    payload = get_score_params(teams)
     HTTParty.put match_close_url, body: payload
     # match is marked finished on the server
   end
 
   def update_match(teams)
-    payload = get_player_params(teams)
+    payload = get_score_params(teams)
     HTTParty.put match_url, body: payload
     # basically, same as end_match, but dones't mark match as finished
   end
@@ -30,6 +30,13 @@ module Server
       params["player_#{i+1}"] = code
     end
     params
+  end
+
+  def get_score_params(teams)
+    {
+      team_a_score: teams.first.score,
+      team_b_score: teams.last.score
+    }
   end
 
   def match_url
