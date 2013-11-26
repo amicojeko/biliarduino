@@ -33,6 +33,12 @@ module Server
   end
 
   def get_player_params(teams)
+    params = {}
+    codes  = teams.map {|t| t.player_codes}.flatten
+    codes.each.with_index do |code, i|
+      params["player_#{i+1}"] = code
+    end
+    params
   end
 
   def domain
