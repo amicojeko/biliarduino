@@ -36,4 +36,12 @@ describe Team do
       expect { team.set_winner }.to change(team, :winner?).to true
     end
   end
+
+  describe '#add_player' do
+    it 'adds the player' do
+      player = double
+      team.add_player player
+      team.players.should include player
+    end
+  end
 end

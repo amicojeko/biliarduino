@@ -13,6 +13,10 @@ class Team
     @winner = true
   end
 
+  def add_player(player)
+    self.players << player
+  end
+
   def winner?
     @winner
   end
