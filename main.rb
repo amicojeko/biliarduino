@@ -116,10 +116,20 @@ class Table
           get_player player until send(player)
         end
       end
-      teams << Team.new(:a)
-      teams << Team.new(:b)
+      create_teams
       set_state :start_match
     end
+  end
+
+  def create_teams
+    team_a = Team.new(:a)
+    team_a.add_player player_0
+    team_a.add_player player_1
+    teams << team_a
+    team_b = Team.new(:b)
+    team_b.add_player player_2
+    team_b.add_player player_3
+    teams << team_b
   end
 
   def get_player(player)
@@ -127,7 +137,7 @@ class Table
     serial = RfidReader.open do
       read_pins
       check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => SKIP_REGISTRATION do |pin|
-        4.times {|n| send "player_#{n}=", n}
+        4.times { |n| send "player_#{n}=", Player.new(n.to_s) }
         set_state :start_match
         return
       end
@@ -161,8 +171,9 @@ class Table
   def start_match
     if state_start_match?
       sound.match_start
-      social.tweet "#{timestamp} A new match has started!"
+      social.tweet "#{timestamp} A new match has started!" # TODO move to the server app
       set_state :match
+      Server.start_match(teams)
     end
   end
 
