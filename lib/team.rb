@@ -20,4 +20,8 @@ class Team
   def winner?
     @winner
   end
+
+  def player_codes
+    players.map { |p| p.code }
+  end
 end
