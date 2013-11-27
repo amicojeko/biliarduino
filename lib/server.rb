@@ -39,18 +39,20 @@ module Server
   end
 
   def post(url, params)
+    puts "[server] POST #{url} #{params.inspect}"
     begin
-      puts "[server] POST #{url} #{params.inspect}"
       HTTParty.post url, body: params
-    rescue
+    rescue => e
+      log_error(e)
     end
   end
 
   def put(url, params)
+    puts "[server] PUT #{url} #{params.inspect}"
     begin
-      puts "[server] PUT #{url} #{params.inspect}"
       HTTParty.put url, body: params
-    rescue
+    rescue => e
+      log_error(e)
     end
   end
 
@@ -65,4 +67,10 @@ module Server
   def domain
     Pathname.new "#{SERVER_CONFIG['protocol']}://#{SERVER_CONFIG['domain']}:#{SERVER_CONFIG['port'] || 80}"
   end
+
+  def log_error(e)
+    puts "[POST ERROR] #{e.message}"
+    pute e.backtrace
+  end
+
 end
