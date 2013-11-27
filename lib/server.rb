@@ -48,7 +48,7 @@ class Server
   end
 
   def domain
-    Pathname.new "#{SERVER_CONFIG['protocol']}://#{SERVER_CONFIG['domain']}:#{SERVER_CONFIG['port'] || 80}"
+    "#{SERVER_CONFIG['protocol']}://#{SERVER_CONFIG['domain']}:#{SERVER_CONFIG['port'] || 80}"
   end
 
   def log_error(e)
