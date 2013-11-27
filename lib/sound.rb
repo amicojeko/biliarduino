@@ -3,7 +3,7 @@ require 'omxplayer'
 class Sound
 
   IDLE_SOUND        = {:name => 'media/idle.wav'         , :duration => 2}
-  START_SOUND       = {:name => 'media/fischio2.wav'         , :duration => 1}
+  START_SOUND       = {:name => 'media/fischio2.wav'     , :duration => 1}
   # GOAL_SOUND_A      = {:name => 'media/goal_team_a.wav'  , :duration => 1} # custom team
   # GOAL_SOUND_B      = {:name => 'media/goal_team_b.wav'  , :duration => 1} # custom team
   REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 2}
