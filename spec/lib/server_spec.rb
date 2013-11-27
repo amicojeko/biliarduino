@@ -7,7 +7,7 @@ describe Server do
     [team_a, team_b]
   end
 
-  subject { Server }
+  subject { Server.new }
 
   it { should respond_to :start_match }
   it { should respond_to :update_match }
@@ -15,13 +15,13 @@ describe Server do
 
   describe '#domain' do
     it 'returns expected string' do
-      Server.domain.to_s.should == 'http://192.168.16.156:3000'
+      subject.domain.to_s.should == 'ws://localhost:3000'
     end
   end
 
   describe '#get_player_params' do
     it 'builds an hash with expected keys' do
-      hash = Server.get_player_params(build_teams)
+      hash = subject.get_player_params(build_teams)
       %w[player_1 player_2 player_3 player_4].each do |key|
         hash.keys.should include key
       end
@@ -29,13 +29,8 @@ describe Server do
   end
 
   describe '#start_match' do
-    it 'posts to the server url' do
-      teams  = build_teams
-      domain = Pathname.new('http://fakeserver.com')
-      url    = "#{domain}/match"
-      Server.stub(:domain => domain)
-      FakeWeb.register_uri(:post, url, :body => '42', :status => ['200', 'OK']) # body is actually not used now
-      Server.start_match(teams).body.should == '42'
+    it 'it uses websockets' do
+      subject.start_match(build_teams).should be_a(TCPSocket)
     end
   end
 end
