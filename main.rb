@@ -36,7 +36,7 @@ class Table
 
 
 
-  attr_reader   :gpio, :sound, :social
+  attr_reader   :gpio, :sound, :social, :server
   attr_accessor :state, :teams, :buttonstate
 
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
@@ -47,6 +47,7 @@ class Table
     @gpio   = WiringPi::GPIO.new(WPI_MODE_PINS)
     @sound  = Sound.new
     @social = Social.new
+    @server = Server.new
     @teams  = []
     init_inputs
     init_outputs
@@ -151,7 +152,7 @@ class Table
   def increase_score(team)
     team.score += 1
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
-    Server.update_match(teams)
+    server.update_match(teams)
     sound.play_random_goal
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
@@ -171,14 +172,14 @@ class Table
     if state_start_match?
       social.tweet "#{timestamp} A new match has started!" # TODO move to the server app
       set_state :match
-      Server.start_match(teams)
+      server.start_match(teams)
       sound.match_start
     end
   end
 
   def end_match
     if state_end_match?
-      Server.close_match(teams)
+      server.close_match(teams)
       sound.match_end
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
       social.tweet "#{timestamp} The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
