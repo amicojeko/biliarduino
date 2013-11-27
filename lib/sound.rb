@@ -8,11 +8,11 @@ class Sound
   # GOAL_SOUND_B      = {:name => 'media/goal_team_b.wav'  , :duration => 1} # custom team
   REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 2}
   MATCH_START_SOUND = {:name => 'media/match_start.wav'  , :duration => 1}
-  MATCH_END_SOUND   = {:name => 'media/match_end.wav'    , :duration => 1}
+  MATCH_END_SOUND   = {:name => 'media/fischiofine.wav'    , :duration => 1}
   WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1} # custom team
   WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1} # custom team
   PLAYER_REGISTERED = {:name => 'media/beep-7.wav',        :duration => 1}
-  SKIP_REGISTRATION = {:name => 'media/beep-7.wav',        :duration => 1}
+  SKIP_REGISTRATION = {:name => 'media/fischio2.wav',      :duration => 1}
 
   attr_reader :omx, :goal, :supporters
 
