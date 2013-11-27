@@ -39,13 +39,19 @@ module Server
   end
 
   def post(url, params)
-    puts "[server] POST #{url} #{params.inspect}"
-    HTTParty.post url, body: params
+    begin
+      puts "[server] POST #{url} #{params.inspect}"
+      HTTParty.post url, body: params
+    rescue
+    end
   end
 
   def put(url, params)
-    puts "[server] PUT #{url} #{params.inspect}"
-    HTTParty.put url, body: params
+    begin
+      puts "[server] PUT #{url} #{params.inspect}"
+      HTTParty.put url, body: params
+    rescue
+    end
   end
 
   def match_url
