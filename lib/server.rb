@@ -42,10 +42,8 @@ class Server
 
   def get_score_params(teams)
     {
-      match: {
-        team_a_score: teams.first.score,
-        team_b_score: teams.last.score
-      }
+      team_a_score: teams.first.score,
+      team_b_score: teams.last.score
     }
   end
 
