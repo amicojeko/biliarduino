@@ -27,7 +27,7 @@ class Table
 
 
   # TODO put all this stuff in the sound library
-  START_SOUND       = {:name => 'media/horn.mp3'         , :duration => 1}
+  START_SOUND       = {:name => 'media/fischio3.wav'     , :duration => 1}
   WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1} # custom team
   WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1} # custom team
   PLAYER_REGISTERED = {:name => 'media/beep-7.wav',        :duration => 1}
