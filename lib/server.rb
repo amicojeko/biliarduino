@@ -70,7 +70,7 @@ module Server
 
   def log_error(e)
     puts "[POST ERROR] #{e.message}"
-    pute e.backtrace
+    puts e.backtrace
   end
 
 end
