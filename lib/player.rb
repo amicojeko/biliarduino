@@ -4,11 +4,20 @@ class Player
   attr_accessor :code, :role, :name
 
 
+  def self.random_rfid
+    SecureRandom.base64(8)
+  end
+
+
   def initialize(code, role=:defense)
-    @code = code.rjust 12, '0'
+    @code = build_code(code)
     @role = role
     @name = code.to_s.upcase # TODO once we have a table, let the users edit the name
     validate_role
+  end
+
+  def build_code(code)
+     code.size == 12 ? code : self.class.random_rfid
   end
 
   private

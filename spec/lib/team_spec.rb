@@ -50,7 +50,7 @@ describe Team do
       %w[123 456].each do |code|
         team.add_player Player.new(code)
       end
-      team.player_codes.should == %w[000000000123 000000000456]
+      team.player_codes.should be_all { |code| code.size == 12 }
     end
   end
 end
