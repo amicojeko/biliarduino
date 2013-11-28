@@ -23,11 +23,16 @@ class Server
     send_message :update_match, get_score_params(teams)
   end
 
-  def send_message(event, payload)
+  def send_message(event, payload, opts={})
+    retries = opts.fetch(:retries, 3)
     begin
       client.send %(["#{event}", {"data": #{payload.to_json}}])
     rescue => e
       log_error e
+      if retries.size > 0
+        connect
+        send_message(event, payload, retries: retries-1)
+      end
     end
   end
 
