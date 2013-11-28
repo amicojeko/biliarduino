@@ -8,7 +8,7 @@ class Server
   attr_reader :client
 
   def initialize
-    @client = build_connection
+    connect
   end
 
   def start_match(teams)
@@ -53,8 +53,8 @@ class Server
 
   private
 
-  def build_connection
-    WebSocket.new File.join(domain, 'websocket')
+  def connect
+    @client = WebSocket.new File.join(domain, 'websocket')
   end
 
   def log_error(e)

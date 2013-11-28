@@ -7,7 +7,7 @@ describe Server do
     [team_a, team_b]
   end
 
-  before { Server.any_instance.stub :build_connection => double.as_null_object }
+  before { Server.any_instance.stub :connect => double.as_null_object }
 
   subject { Server.new }
 
