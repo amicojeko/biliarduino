@@ -174,6 +174,8 @@ class Table
       self.server = Server.new
       server.start_match(teams)
       sound.match_start
+      sleep 0.5
+      sound.play_background_supporters
     end
   end
 
@@ -276,7 +278,6 @@ class Table
   def finalize_match(team)
     team.set_winner
     debug "the winner is team #{team.name}"
-    play_sound self.class.const_get "WINNER_TEAM_#{team.name}"
     set_state :end_match
   end
 

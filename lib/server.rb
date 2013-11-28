@@ -25,6 +25,7 @@ class Server
 
   def send_message(event, payload, opts={})
     retries = opts.fetch(:retries, 3)
+    log_message event, payload
     begin
       client.send %(["#{event}", {"data": #{payload.to_json}}])
     rescue => e
@@ -65,5 +66,9 @@ class Server
   def log_error(e)
     puts "[SERVER ERROR] #{e.message}"
     puts e.backtrace
+  end
+
+  def log_message(event, payload)
+    puts "[SERVER] #{event}: #{payload.inspect}"
   end
 end
