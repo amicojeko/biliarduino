@@ -174,6 +174,8 @@ class Table
       self.server = Server.new
       server.start_match(teams)
       sound.match_start
+      sleep 0.5
+      sound.play_background_supporters
     end
   end
 
