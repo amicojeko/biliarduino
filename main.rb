@@ -36,8 +36,8 @@ class Table
 
 
 
-  attr_reader   :gpio, :sound, :social, :server
-  attr_accessor :state, :teams, :buttonstate
+  attr_reader   :gpio, :sound, :social
+  attr_accessor :state, :teams, :buttonstate, :server
 
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
 
