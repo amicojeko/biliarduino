@@ -7,6 +7,8 @@ describe Server do
     [team_a, team_b]
   end
 
+  before { Server.any_instance.stub :build_connection => double.as_null_object }
+
   subject { Server.new }
 
   it { should respond_to :start_match }
@@ -30,6 +32,7 @@ describe Server do
 
   describe '#start_match' do
     it 'it uses websockets' do
+      pending
       subject.start_match(build_teams).should be_a(TCPSocket)
     end
   end
