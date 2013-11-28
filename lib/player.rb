@@ -1,3 +1,5 @@
+require 'securerandom'
+
 class Player
   ROLES = [:defense, :attack]
 
