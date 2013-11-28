@@ -278,7 +278,6 @@ class Table
   def finalize_match(team)
     team.set_winner
     debug "the winner is team #{team.name}"
-    play_sound self.class.const_get "WINNER_TEAM_#{team.name}"
     set_state :end_match
   end
 
