@@ -47,7 +47,6 @@ class Table
     @gpio   = WiringPi::GPIO.new(WPI_MODE_PINS)
     @sound  = Sound.new
     @social = Social.new
-    @server = Server.new
     @teams  = []
     init_inputs
     init_outputs
@@ -172,6 +171,7 @@ class Table
     if state_start_match?
       social.tweet "#{timestamp} A new match has started!" # TODO move to the server app
       set_state :match
+      self.server = Server.new
       server.start_match(teams)
       sound.match_start
     end
