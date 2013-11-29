@@ -1,5 +1,7 @@
 require 'wiringpi'
 require 'omxplayer'
+require 'json'
+require 'yaml'
 
 Dir['lib/*.rb'].each do |file|
   require File.expand_path "../#{file}", __FILE__
@@ -37,7 +39,7 @@ class Table
 
 
   attr_reader   :gpio, :sound, :social
-  attr_accessor :state, :teams, :buttonstate, :server
+  attr_accessor :state, :teams, :buttonstate, :ws
 
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
 
@@ -53,16 +55,38 @@ class Table
     unglock
   end
 
-  def mainloop
-    loop do
-      read_pins
-      wait_for_start
-      register_players
-      start_match
-      end_match
-      check_input_pins
-      sleep DELAY
+  def em_loop
+    EM.run do
+      #FIXME add url
+      self.ws = WebSocket::EventMachine::Client.connect(:uri => 'ws://localhost:3000/websocket')
+      ws.onopen do
+        puts "[EM] OPEN CONNECTION"
+      end
+
+      ws.onmessage do |msg, type|
+        puts "[EM] received: #{msg}"
+        ws.send('["websocket_rails.pong", {}]') if msg =~ /websocket_rails.ping/
+      end
+
+      ws.onclose do
+        puts '[EM] disconnected'
+      end
+
+      EM.add_periodic_timer DELAY, &method(:mainloop)
+      # EventMachine.next_tick do
+      #   mainloop
+      # end
     end
+  end
+
+  def mainloop
+    read_pins
+    wait_for_start
+    register_players
+    start_match
+    end_match
+    check_input_pins
+    # sleep DELAY
   end
 
   STATES.each do |state, value|
@@ -151,7 +175,7 @@ class Table
   def increase_score(team)
     team.score += 1
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
-    server.update_match(teams)
+    ws_update_match(teams)
     sound.play_random_goal
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
@@ -172,7 +196,7 @@ class Table
       social.tweet "#{timestamp} A new match has started!" # TODO move to the server app
       set_state :match
       self.server = Server.new
-      server.start_match(teams)
+      ws_start_match(teams)
       sound.match_start
       sleep 0.5
       sound.play_background_supporters
@@ -181,7 +205,7 @@ class Table
 
   def end_match
     if state_end_match?
-      server.close_match(teams)
+      ws_close_match(teams)
       sound.match_end
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
       social.tweet "#{timestamp} The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
@@ -298,10 +322,42 @@ class Table
   def timestamp
     Time.now.strftime '%H:%M'
   end
+
+  def ws_start_match(teams)
+    payload = get_player_params(teams)
+    ws.send %(["start_match", {"data": #{payload.to_json}}])
+  end
+
+  def ws_update_match(teams)
+    payload = get_score_params(teams)
+    ws.send %(["update_match", {"data": #{payload.to_json}}])
+  end
+
+  def ws_close_match(teams)
+    payload = get_score_params(teams)
+    ws.send %(["close_match", {"data": #{payload.to_json}}])
+  end
+
+
+
+
+  def get_player_params(teams)
+    params = {}
+    codes  = teams.map {|t| t.player_codes}.flatten
+    codes.each.with_index do |code, i|
+      params["player_#{i+1}"] = code
+    end
+    params
+  end
+
+  def get_score_params(teams)
+    {
+      team_a_score: teams.first.score,
+      team_b_score: teams.last.score
+    }
+  end
 end
 
 t = Table.new
 t.set_state :idle
-t.mainloop
-
-
+t.em_loop
