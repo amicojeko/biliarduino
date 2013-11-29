@@ -7,10 +7,6 @@ SERVER_CONFIG = YAML.load_file File.expand_path('../../config/server.yml', __FIL
 class Server
   attr_reader :client
 
-  def initialize
-    connect
-  end
-
   def start_match(teams)
     send_message :start_match, get_player_params(teams)
   end
@@ -23,18 +19,12 @@ class Server
     send_message :update_match, get_score_params(teams)
   end
 
-  def send_message(event, payload, opts={})
-    retries = opts.fetch(:retries, 3)
+  def send_message(event, payload)
     log_message event, payload
-    begin
-      client.send %(["#{event}", {"data": #{payload.to_json}}])
-    rescue => e
-      log_error e
-      if retries.size > 0
-        connect
-        send_message(event, payload, retries: retries-1)
-      end
-    end
+    connect
+    client.send %(["#{event}", {"data": #{payload.to_json}}])
+  rescue => e
+    log_error e
   end
 
   def get_player_params(teams)
