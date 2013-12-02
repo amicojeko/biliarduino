@@ -48,7 +48,6 @@ class Table
   def initialize
     @gpio   = WiringPi::GPIO.new(WPI_MODE_PINS)
     @sound  = Sound.new
-    @socket = ServerSocket.new
     @teams  = []
     init_inputs
     init_outputs
@@ -57,6 +56,7 @@ class Table
 
   def em_loop
     EM.run do
+      @socket = ServerSocket.new
       EM.add_periodic_timer DELAY, &method(:mainloop)
     end
   end
