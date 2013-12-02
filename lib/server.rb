@@ -1,6 +1,5 @@
 require 'yaml'
 require 'json'
-require 'web_socket'
 
 SERVER_CONFIG = YAML.load_file File.expand_path('../../config/server.yml', __FILE__)
 
