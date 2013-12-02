@@ -67,7 +67,7 @@ class ServerSocket
   end
 
   def trigger_event(event, data)
-    ws.send %(["#{event}", {"data": #{data}}}])
+    ws.send %(["#{event}", {"data": #{data}}])
   end
 
   def start_match_json(teams)
