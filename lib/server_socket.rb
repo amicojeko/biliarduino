@@ -19,15 +19,15 @@ class ServerSocket
   end
 
   def add_events
+    ws.onclose { puts "[EM] connected to #{URL}" }
     ws.onmessage do |msg, type|
       puts "[EM] received: #{msg}"
       if msg =~ /websocket_rails.ping/
-        binding.pry
         puts "[EM] ponging..."
         ws.send('["websocket_rails.pong", {}]')
       end
     end
-    ws.onclose { puts '[EM] disconnected' }
+    ws.onclose { puts "[EM] disconnected #{URL}" }
   end
 
   def start_match(teams)
