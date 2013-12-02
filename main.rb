@@ -36,8 +36,8 @@ class Table
 
 
 
-  attr_reader   :gpio, :sound, :social
-  attr_accessor :state, :teams, :buttonstate, :server
+  attr_reader   :gpio, :sound
+  attr_accessor :state, :teams, :buttonstate
 
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
 
@@ -46,7 +46,6 @@ class Table
   def initialize
     @gpio   = WiringPi::GPIO.new(WPI_MODE_PINS)
     @sound  = Sound.new
-    @social = Social.new
     @teams  = []
     init_inputs
     init_outputs
@@ -169,9 +168,7 @@ class Table
 
   def start_match
     if state_start_match?
-      social.tweet "#{timestamp} A new match has started!" # TODO move to the server app
       set_state :match
-      self.server = Server.new
       server.start_match(teams)
       sound.match_start
       sleep 0.5
@@ -184,7 +181,6 @@ class Table
       server.close_match(teams)
       sound.match_end
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
-      social.tweet "#{timestamp} The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
       set_state :idle
     end
   end
@@ -291,12 +287,12 @@ class Table
   end
 
   def say(text)
-    # @say_pid = fork { exec 'echo "' + text + '" | festival --tts'}
-    @say_pid = fork { exec 'espeak "' + text + '"'}
+    @say_pid = fork { exec %(espeak "#{text}") }
   end
 
-  def timestamp
-    Time.now.strftime '%H:%M'
+  # TODO this is crying for refactoring.
+  def server
+    Server.new
   end
 end
 
