@@ -57,7 +57,6 @@ class Table
   def em_loop
     EM.run do
       server_socket = ServerSocket.new
-      add_events
       EM.add_periodic_timer DELAY, &method(:mainloop)
     end
   end
