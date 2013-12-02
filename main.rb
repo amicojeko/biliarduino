@@ -38,7 +38,7 @@ class Table
 
 
 
-  attr_reader   :gpio, :sound
+  attr_reader   :gpio, :sound, :socket
   attr_accessor :state, :teams, :buttonstate, :ws
 
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
@@ -48,6 +48,7 @@ class Table
   def initialize
     @gpio   = WiringPi::GPIO.new(WPI_MODE_PINS)
     @sound  = Sound.new
+    @socket = ServerSocket.new
     @teams  = []
     init_inputs
     init_outputs
@@ -56,7 +57,6 @@ class Table
 
   def em_loop
     EM.run do
-      server_socket = ServerSocket.new
       EM.add_periodic_timer DELAY, &method(:mainloop)
     end
   end
