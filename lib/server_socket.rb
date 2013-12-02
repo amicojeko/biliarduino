@@ -4,8 +4,31 @@ require 'websocket-eventmachine-client'
 
 SERVER_CONFIG = YAML.load_file File.expand_path('../../config/server.yml', __FILE__)
 
+
+
 class ServerSocket
   URL = "#{SERVER_CONFIG['protocol']}://#{SERVER_CONFIG['domain']}:#{SERVER_CONFIG['port'] || 80}/websocket"
+
+  class Message
+    attr_reader :event, :data, :type, :json
+
+    def initialize(msg, type)
+      @type  = type
+      @json  = get_json(msg)
+      @event = json.first
+      @data  = json.last['data']
+    end
+
+    def ping?
+      event == 'websocket_rails.ping'
+    end
+
+    def get_json(msg)
+      JSON.parse(msg).first
+    end
+  end
+
+
 
   attr_reader :ws
 
@@ -19,15 +42,16 @@ class ServerSocket
   end
 
   def add_events
-    ws.onclose { puts "[EM] connected to #{URL}" }
+    ws.onopen { puts "[EM] connected to #{URL}" }
     ws.onmessage do |msg, type|
-      puts "[EM] received: #{msg}"
-      if msg =~ /websocket_rails.ping/
-        puts "[EM] ponging..."
-        ws.send('["websocket_rails.pong", {}]')
-      end
+      message = Message.new(msg, type)
+      pong if message.ping?
     end
     ws.onclose { puts "[EM] disconnected #{URL}" }
+  end
+
+  def pong
+    ws.send('["websocket_rails.pong", {}]')
   end
 
   def start_match(teams)

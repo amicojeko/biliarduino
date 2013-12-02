@@ -156,7 +156,7 @@ class Table
   def increase_score(team)
     team.score += 1
     debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
-    server_socket.update_match(teams)
+    socket.update_match(teams)
     sound.play_random_goal
     if team.score >= MAX_GOALS
       unless GOLDEN_GOAL
@@ -175,7 +175,7 @@ class Table
   def start_match
     if state_start_match?
       set_state :match
-      server_socket.start_match(teams)
+      socket.start_match(teams)
       sound.match_start
       sleep 0.5
       sound.play_background_supporters
@@ -184,7 +184,7 @@ class Table
 
   def end_match
     if state_end_match?
-      server_socket.close_match(teams)
+      socket.close_match(teams)
       sound.match_end
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
       set_state :idle
@@ -279,7 +279,6 @@ class Table
 
   def finalize_match(team)
     team.set_winner
-    debug "the winner is team #{team.name}"
     set_state :end_match
   end
 

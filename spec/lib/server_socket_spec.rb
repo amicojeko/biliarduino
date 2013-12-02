@@ -23,4 +23,26 @@ describe ServerSocket do
       end
     end
   end
+
+  describe ServerSocket::Message do
+    let(:msg) { "[[\"websocket_rails.ping\",{\"id\":null,\"channel\":null,\"user_id\":null,\"data\":{\"id\": \"42\"},\"success\":null,\"result\":null,\"server_token\":null}]]" }
+    let(:type) { :text }
+
+    subject { ServerSocket::Message.new msg, type }
+    %w[json data event type].each do |method|
+      it { should respond_to method }
+    end
+
+    it 'has expected event' do
+      subject.event.should == 'websocket_rails.ping'
+    end
+
+    it 'has expected data' do
+      subject.data.should == {'id' => '42'}
+    end
+
+    it 'is ping event' do
+      subject.should be_ping
+    end
+  end
 end
