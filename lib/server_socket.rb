@@ -1,5 +1,6 @@
 require 'yaml'
 require 'json'
+require 'websocket-eventmachine-client'
 
 SERVER_CONFIG = YAML.load_file File.expand_path('../../config/server.yml', __FILE__)
 
@@ -9,8 +10,12 @@ class ServerSocket
   attr_reader :ws
 
   def initialize
-    @ws = WebSocket::EventMachine::Client.connect(uri: URL)
+    @ws = build_socket
     add_events
+  end
+
+  def build_socket
+    WebSocket::EventMachine::Client.connect(uri: URL)
   end
 
   def add_events
