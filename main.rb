@@ -13,7 +13,7 @@ $debug = true if ARGV.delete('-d')
 
 class Table
   # TODO much of these constants should go in a configuration file
-  MAX_GOALS    = 3 # 8
+  MAX_GOALS    = 6 # 8
   PLAYERS      = 4 # when 2 players match you just register twice
   GOAL_DELAY   = 3
   DELAY        = 0.002
@@ -38,7 +38,7 @@ class Table
 
 
 
-  attr_reader   :gpio, :sound, :social
+  attr_reader   :gpio, :sound
   attr_accessor :state, :teams, :buttonstate, :ws
 
   PLAYERS.times { |n| attr_accessor "player_#{n}" }
@@ -48,7 +48,6 @@ class Table
   def initialize
     @gpio   = WiringPi::GPIO.new(WPI_MODE_PINS)
     @sound  = Sound.new
-    @social = Social.new
     @teams  = []
     init_inputs
     init_outputs
@@ -57,20 +56,15 @@ class Table
 
   def em_loop
     EM.run do
-      #FIXME add url
-      self.ws = WebSocket::EventMachine::Client.connect(:uri => 'ws://localhost:3000/websocket')
-      ws.onopen do
-        puts "[EM] OPEN CONNECTION"
-      end
+      self.ws = WebSocket::EventMachine::Client.connect(uri: Server.new.url)
+      ws.onopen { puts "[EM] OPEN CONNECTION" }
 
       ws.onmessage do |msg, type|
         puts "[EM] received: #{msg}"
         ws.send('["websocket_rails.pong", {}]') if msg =~ /websocket_rails.ping/
       end
 
-      ws.onclose do
-        puts '[EM] disconnected'
-      end
+      ws.onclose { puts '[EM] disconnected' }
 
       EM.add_periodic_timer DELAY, &method(:mainloop)
       # EventMachine.next_tick do
@@ -193,9 +187,7 @@ class Table
 
   def start_match
     if state_start_match?
-      social.tweet "#{timestamp} A new match has started!" # TODO move to the server app
       set_state :match
-      self.server = Server.new
       ws_start_match(teams)
       sound.match_start
       sleep 0.5
@@ -208,7 +200,6 @@ class Table
       ws_close_match(teams)
       sound.match_end
       debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
-      social.tweet "#{timestamp} The match is over. The final result is Blue Team: #{teams.first.score} - Red Team: #{teams.last.score}"
       set_state :idle
     end
   end
@@ -315,13 +306,10 @@ class Table
   end
 
   def say(text)
-    # @say_pid = fork { exec 'echo "' + text + '" | festival --tts'}
-    @say_pid = fork { exec 'espeak "' + text + '"'}
+    @say_pid = fork { exec %(espeak "#{text}") }
   end
 
-  def timestamp
-    Time.now.strftime '%H:%M'
-  end
+  # TODO this is crying for refactoring.
 
   def ws_start_match(teams)
     payload = get_player_params(teams)
@@ -337,9 +325,6 @@ class Table
     payload = get_score_params(teams)
     ws.send %(["close_match", {"data": #{payload.to_json}}])
   end
-
-
-
 
   def get_player_params(teams)
     params = {}

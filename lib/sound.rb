@@ -17,38 +17,38 @@ class Sound
 
   attr_reader :omx, :goal, :supporters, :music
 
-	def initialize
-		@omx  = Omxplayer.instance
-		@goal = Dir.glob("./media/goal*.wav")
-		@supporters = Dir.glob("./media/tifo*.wav")
+  def initialize
+    @omx  = Omxplayer.instance
+    @goal = Dir.glob("./media/goal*.wav")
+    @supporters = Dir.glob("./media/tifo*.wav")
     @music = Dir.glob("./media/music*.mp3")
-	end
+  end
 
-	def play_idle_sound
-		play_sound IDLE_SOUND
-    play_background_music
-	end
+  def play_idle_sound
+    play_sound IDLE_SOUND
+    # play_background_music
+  end
 
-	def play_register_sound
-		play_sound REGISTER_SOUND
-	end
+  def play_register_sound
+    play_sound REGISTER_SOUND
+  end
 
-	def play_random_goal
-		play_sound goal.sample
+  def play_random_goal
+    play_sound goal.sample
     play_background_supporters
-	end
+  end
 
   def play_background_supporters
     omx.open supporters.sample
   end
 
-	def play_background_music
-		omx.open music.sample
-	end
+  def play_background_music
+   omx.open music.sample
+  end
 
-	def play_register_player_sound(n)
-		play_sound "./media/player_#{n}.wav"
-	end
+  def play_register_player_sound(n)
+    play_sound "./media/player_#{n}.wav"
+  end
 
   def match_start
     play_sound MATCH_START_SOUND
@@ -62,9 +62,9 @@ class Sound
     play_sound tune
   end
 
-	private
+  private
 
-	def play_sound(sound)
+  def play_sound(sound)
     stop_sound
     sound = {:name => sound, :duration => 2} if sound.is_a?(String)
     omx.open sound[:name]
