@@ -72,7 +72,8 @@ class Table
 
   def close_stale_connection_and_reconnect
     if socket and socket.instance_variable_get('@state') != :open
-    @socket = ServerSocket.new
+      @socket = ServerSocket.new
+    end
   end
 
   STATES.each do |state, value|
