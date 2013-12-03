@@ -56,6 +56,7 @@ class Table
 
   def em_loop
     EM.run do
+      @socket = ServerSocket.new
       EM.add_periodic_timer DELAY, &method(:mainloop)
     end
   end
@@ -71,7 +72,7 @@ class Table
   end
 
   def close_stale_connection_and_reconnect
-    if !socket or socket.instance_variable_get('@state') != :open
+    if socket.ws.instance_variable_get('@state') == :closed
       @socket = ServerSocket.new
     end
   end
