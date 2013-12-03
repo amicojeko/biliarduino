@@ -37,6 +37,13 @@ class ServerSocket
     add_events
   end
 
+  # TODO isn't there a better way to check the state?
+  # it probably would be better to handle reconnections
+  # on the onclose event.
+  def closed?
+    ws.instance_variable_get('@state') == :closed
+  end
+
   def build_socket
     WebSocket::EventMachine::Client.connect(uri: URL)
   end

@@ -62,7 +62,7 @@ class Table
   end
 
   def mainloop
-    close_stale_connection_and_reconnect
+    open_new_connection_if_closed
     read_pins
     wait_for_start
     register_players
@@ -71,10 +71,8 @@ class Table
     check_input_pins
   end
 
-  def close_stale_connection_and_reconnect
-    if socket.ws.instance_variable_get('@state') == :closed
-      @socket = ServerSocket.new
-    end
+  def open_new_connection_if_closed
+    @socket = ServerSocket.new if socket.closed? # TODO this could be moved into the server_socket class
   end
 
   STATES.each do |state, value|
