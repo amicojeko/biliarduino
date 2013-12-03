@@ -56,18 +56,23 @@ class Table
 
   def em_loop
     EM.run do
-      @socket = ServerSocket.new
       EM.add_periodic_timer DELAY, &method(:mainloop)
     end
   end
 
   def mainloop
+    close_stale_connection_and_reconnect
     read_pins
     wait_for_start
     register_players
     start_match
     end_match
     check_input_pins
+  end
+
+  def close_stale_connection_and_reconnect
+    if socket and socket.instance_variable_get('@state') != :open
+    @socket = ServerSocket.new
   end
 
   STATES.each do |state, value|
