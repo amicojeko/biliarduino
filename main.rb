@@ -62,12 +62,17 @@ class Table
   end
 
   def mainloop
+    open_new_connection_if_closed
     read_pins
     wait_for_start
     register_players
     start_match
     end_match
     check_input_pins
+  end
+
+  def open_new_connection_if_closed
+    @socket = ServerSocket.new if socket.closed? # TODO this could be moved into the server_socket class
   end
 
   STATES.each do |state, value|
