@@ -13,7 +13,7 @@ $debug = true if ARGV.delete('-d')
 
 class Table
   # TODO much of these constants should go in a configuration file
-  MAX_GOALS    = 6 # 8
+  MAX_GOALS    = 3 # 8
   PLAYERS      = 4 # when 2 players match you just register twice
   GOAL_DELAY   = 3
   DELAY        = 0.002
