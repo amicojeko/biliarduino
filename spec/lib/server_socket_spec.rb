@@ -7,9 +7,11 @@ describe ServerSocket do
     [team_a, team_b]
   end
 
+  let(:table) { double.as_null_object }
+
   before { ServerSocket.any_instance.stub build_socket: double.as_null_object }
 
-  subject { ServerSocket.new }
+  subject { ServerSocket.new(table) }
 
   it { should respond_to :start_match }
   it { should respond_to :update_match }

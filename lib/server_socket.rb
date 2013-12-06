@@ -23,6 +23,10 @@ class ServerSocket
       event == 'websocket_rails.ping'
     end
 
+    def match_closed?
+      event == 'match_closed'
+    end
+
     def get_json(msg)
       JSON.parse(msg).first
     end
@@ -30,10 +34,11 @@ class ServerSocket
 
 
 
-  attr_reader :ws
+  attr_reader :ws, :table
 
-  def initialize
-    @ws = build_socket
+  def initialize(table)
+    @table = table
+    @ws    = build_socket
     add_events
   end
 
@@ -53,6 +58,7 @@ class ServerSocket
     ws.onmessage do |msg, type|
       message = Message.new(msg, type)
       pong if message.ping?
+      table.set_state(:end_match) if message.match_closed?
     end
     ws.onclose { puts "[EM] disconnected #{URL}" }
   end
