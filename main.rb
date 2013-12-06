@@ -26,16 +26,6 @@ class Table
   }
 
 
-  # TODO put all this stuff in the sound library
-  REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 2}
-  START_SOUND       = {:name => 'media/fischio2.wav'     , :duration => 1}
-  WINNER_TEAM_A     = {:name => "media/winner_team_a.wav", :duration => 1} # custom team
-  WINNER_TEAM_B     = {:name => "media/winner_team_b.wav", :duration => 1} # custom team
-  PLAYER_REGISTERED = {:name => 'media/beep-7.wav',        :duration => 1}
-  SKIP_REGISTRATION = {:name => 'media/fischio2.wav',        :duration => 1}
-
-
-
   attr_reader   :gpio, :sound, :socket
   attr_accessor :state, :teams, :buttonstate, :ws
 
@@ -81,25 +71,28 @@ class Table
 
   def set_state(state)
     @__flushed = false
+    @started = false if state == :idle
     self.state = STATES[state]
   end
 
   private
 
   def check_input_pins
-    check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => START_SOUND, :on_state => :idle do |pin|
+    check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => :start_sound, :on_state => :idle do |pin|
       set_state :registration
       unglock
     end
     check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :on_state => :match do |pin|
       unless pin.locked?
-        server.update_score :a
+        sound.play_random_goal
+        socket.update_score :a
         pin.lock
       end
     end
     check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :on_state => :match do |pin|
       unless pin.locked?
-        server.update_score :b
+        sound.play_random_goal
+        socket.update_score :b
         pin.lock
       end
     end
@@ -108,7 +101,7 @@ class Table
 
   def wait_for_start
     if state_idle? and !@started
-      debug_once "idle - please push start button"
+      debug_once 'idle - please push start button'
       sound.play_idle_sound
       @started = true
     end
@@ -145,41 +138,22 @@ class Table
     debug "waiting for #{player}"
     serial = RfidReader.open do
       read_pins
-      check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => SKIP_REGISTRATION do |pin|
-        4.times { |n| send "player_#{n}=", Player.new(n.to_s) }
+      check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => :skip_registration do |pin|
+        PLAYERS.times { |n| send "player_#{n}=", Player.new(n.to_s) }
         set_state :start_match
         return
       end
     end
     debug "#{player}: #{serial.reading}"
     send "#{player}=", Player.new(serial.reading)
-    play_sound PLAYER_REGISTERED
+    sound.play_player_registered
   end
-
-  # def increase_score(team)
-  #   team.score += 1
-  #   debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
-  #   socket.update_match(teams)
-  #   sound.play_random_goal
-  #   if team.score >= MAX_GOALS
-  #     unless GOLDEN_GOAL
-  #       finalize_match team
-  #     else
-  #       finalize_match(team) if team.score >= other_team(team).score + 2
-  #     end
-  #   end
-  #   unglock
-  # end
-
-  # def other_team(team)
-  #   teams.detect {|t| t.code != team.code}
-  # end
 
   def start_match
     if state_start_match?
       set_state :match
       socket.start_match(teams)
-      sound.match_start
+      sound.play_match_start
       sleep 0.5
       sound.play_background_supporters
     end
@@ -187,8 +161,7 @@ class Table
 
   def end_match
     if state_end_match?
-      # socket.close_match(teams)
-      sound.match_end
+      sound.play_match_end
       set_state :idle
     end
   end
@@ -277,11 +250,6 @@ class Table
     camera = team.code
     fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam_#{Time.now.to_i}.jpg'"}
   end
-
-  # def finalize_match(team)
-  #   team.set_winner
-  #   set_state :end_match
-  # end
 
   def play_sound(tune)
     sound.play tune

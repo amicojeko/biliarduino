@@ -24,13 +24,25 @@ class Sound
     @music = Dir.glob("./media/music*.mp3")
   end
 
+  # TODO this can be dried up... before that, check what sound constants are really used and delete the unnecessary ones
+  def play_skip_registration
+    play_sound SKIP_REGISTRATION
+  end
+
+  def play_start_sound
+    play_sound START_SOUND
+  end
+
   def play_idle_sound
     play_sound IDLE_SOUND
-    # play_background_music
   end
 
   def play_register_sound
     play_sound REGISTER_SOUND
+  end
+
+  def play_player_registered
+    play_sound PLAYER_REGISTERED
   end
 
   def play_random_goal
@@ -50,11 +62,11 @@ class Sound
     play_sound "./media/player_#{n}.wav"
   end
 
-  def match_start
+  def play_match_start
     play_sound MATCH_START_SOUND
   end
 
-  def match_end
+  def play_match_end
     play_sound MATCH_END_SOUND
   end
 
