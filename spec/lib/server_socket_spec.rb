@@ -14,8 +14,7 @@ describe ServerSocket do
   subject { ServerSocket.new(table) }
 
   it { should respond_to :start_match }
-  it { should respond_to :update_match }
-  it { should respond_to :close_match }
+  it { should respond_to :update_score }
 
   describe '#start_match_json' do
     it 'builds an hash with expected keys' do

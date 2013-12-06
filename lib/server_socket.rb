@@ -71,15 +71,8 @@ class ServerSocket
     trigger_event :start_match, start_match_json(teams)
   end
 
-  def update_match(teams)
-    trigger_event :update_match, update_match_json(teams)
-  end
-
   def update_score(team_name)
-    trigger_event :update_score, {team: team_name}
-
-  def close_match(teams)
-    trigger_event :close_match, close_match_json(teams)
+    trigger_event :update_score, {team: team_name}.to_json
   end
 
   def trigger_event(event, data)
@@ -94,13 +87,5 @@ class ServerSocket
     end
     params.to_json
   end
-
-  def update_match_json(teams)
-    {
-      team_a_score: teams.first.score,
-      team_b_score: teams.last.score
-    }.to_json
-  end
-  alias close_match_json update_match_json
 end
 
