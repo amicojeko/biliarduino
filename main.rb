@@ -13,11 +13,9 @@ $debug = true if ARGV.delete('-d')
 
 class Table
   # TODO much of these constants should go in a configuration file
-  MAX_GOALS    = 3 # 8
   PLAYERS      = 4 # when 2 players match you just register twice
   GOAL_DELAY   = 3
   DELAY        = 0.002
-  GOLDEN_GOAL  = true
   OUTPUT_PINS  = {led: 7} # TODO the only output pin used now is for debugging glocked input state
   LED_STATES   = {:on => 1, :off => 0}
   STATES       = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
@@ -56,7 +54,7 @@ class Table
 
   def em_loop
     EM.run do
-      @socket = ServerSocket.new
+      @socket = ServerSocket.new(self)
       EM.add_periodic_timer DELAY, &method(:mainloop)
     end
   end
@@ -72,7 +70,7 @@ class Table
   end
 
   def open_new_connection_if_closed
-    @socket = ServerSocket.new if socket.closed? # TODO this could be moved into the server_socket class
+    @socket = ServerSocket.new(self) if socket.closed? # TODO this could be moved into the server_socket class
   end
 
   STATES.each do |state, value|
@@ -95,13 +93,13 @@ class Table
     end
     check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :on_state => :match do |pin|
       unless pin.locked?
-        increase_score teams[0]
+        server.update_score :a
         pin.lock
       end
     end
     check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :on_state => :match do |pin|
       unless pin.locked?
-        increase_score teams[1]
+        server.update_score :b
         pin.lock
       end
     end
@@ -158,24 +156,24 @@ class Table
     play_sound PLAYER_REGISTERED
   end
 
-  def increase_score(team)
-    team.score += 1
-    debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
-    socket.update_match(teams)
-    sound.play_random_goal
-    if team.score >= MAX_GOALS
-      unless GOLDEN_GOAL
-        finalize_match team
-      else
-        finalize_match(team) if team.score >= other_team(team).score + 2
-      end
-    end
-    unglock
-  end
+  # def increase_score(team)
+  #   team.score += 1
+  #   debug "team #{team.name} score: #{team.score}, team #{other_team(team).name} score: #{other_team(team).score}"
+  #   socket.update_match(teams)
+  #   sound.play_random_goal
+  #   if team.score >= MAX_GOALS
+  #     unless GOLDEN_GOAL
+  #       finalize_match team
+  #     else
+  #       finalize_match(team) if team.score >= other_team(team).score + 2
+  #     end
+  #   end
+  #   unglock
+  # end
 
-  def other_team(team)
-    teams.detect {|t| t.code != team.code}
-  end
+  # def other_team(team)
+  #   teams.detect {|t| t.code != team.code}
+  # end
 
   def start_match
     if state_start_match?
@@ -189,9 +187,8 @@ class Table
 
   def end_match
     if state_end_match?
-      socket.close_match(teams)
+      # socket.close_match(teams)
       sound.match_end
-      debug "the final result is team a: #{teams.first.score}, team b: #{teams.last.score}"
       set_state :idle
     end
   end
@@ -214,7 +211,6 @@ class Table
   # it's our responsibility to unglock the pins
   def check_pressed(pin, opts)
     if pin_pressed? pin
-
       # true when state is missing (callback happens always), or is correct for this event
       if !opts[:on_state] or opts[:on_state] && send("state_#{opts[:on_state]}?")
         glock
@@ -282,10 +278,10 @@ class Table
     fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam_#{Time.now.to_i}.jpg'"}
   end
 
-  def finalize_match(team)
-    team.set_winner
-    set_state :end_match
-  end
+  # def finalize_match(team)
+  #   team.set_winner
+  #   set_state :end_match
+  # end
 
   def play_sound(tune)
     sound.play tune

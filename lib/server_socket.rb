@@ -75,6 +75,9 @@ class ServerSocket
     trigger_event :update_match, update_match_json(teams)
   end
 
+  def update_score(team_name)
+    trigger_event :update_score, {team: team_name}
+
   def close_match(teams)
     trigger_event :close_match, close_match_json(teams)
   end
