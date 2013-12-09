@@ -21,7 +21,7 @@ class Team
     @winner
   end
 
-  def player_codes
-    players.map { |p| p.code }
+  def player_rfids
+    players.map { |p| p.rfid }
   end
 end

@@ -45,12 +45,12 @@ describe Team do
     end
   end
 
-  describe '#player_codes' do
-    it 'returns player codes' do
-      %w[123 456].each do |code|
-        team.add_player Player.new(code)
+  describe '#player_rfids' do
+    it 'returns player rfids' do
+      %w[123 456].each do |rfid|
+        team.add_player Player.new(rfid)
       end
-      team.player_codes.should be_all { |code| code.size == 12 }
+      team.player_rfids.should be_all { |id| %w[123 456].include? id }
     end
   end
 end

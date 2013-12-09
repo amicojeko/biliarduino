@@ -84,9 +84,9 @@ class ServerSocket
 
   def start_match_json(teams)
     params = {}
-    codes  = teams.map {|t| t.player_codes}.flatten
-    codes.each.with_index do |code, i|
-      params["player_#{i+1}"] = code
+    rfids  = teams.map {|t| t.player_rfids}.flatten
+    rfids.each.with_index do |rfid, i|
+      params["player_#{i+1}"] = rfid
     end
     params.to_json
   end
