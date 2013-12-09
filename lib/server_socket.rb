@@ -24,7 +24,7 @@ class ServerSocket
     end
 
     def match_closed?
-      event == 'match_closed'
+      event == 'close_match'
     end
 
     def get_json(msg)
@@ -56,9 +56,12 @@ class ServerSocket
   def add_events
     ws.onopen { puts "[EM] connected to #{URL}" }
     ws.onmessage do |msg, type|
+      puts msg
       message = Message.new(msg, type)
       pong if message.ping?
-      table.close_match if message.match_closed?
+      if message.match_closed?
+        table.close_match
+      end
     end
     ws.onclose { puts "[EM] disconnected #{URL}" }
   end

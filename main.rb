@@ -71,6 +71,11 @@ class Table
     self.state = STATES[state]
   end
 
+  def close_match
+    set_state(:end_match)
+    sound.reset_sounds
+  end
+
   private
 
   def check_input_pins
@@ -219,13 +224,6 @@ class Table
     self.teams = []
     PLAYERS.times {|n| send "player_#{n}=", nil}
   end
-
-  def close_match
-    set_state(:end_match)
-    sound.reset_sounds
-  end
-
-  private
 
   # FIXME prende un parametro, ma non viene usato
   def get_snapshot(team)

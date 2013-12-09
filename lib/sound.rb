@@ -21,6 +21,10 @@ class Sound
     @supporters = Dir.glob('./media/tifo*.wav')
   end
 
+  def reset_sounds
+    played.clear
+  end
+
   constants.each do |constant|
     const = const_get(constant)
     sound = constant.to_s.downcase
