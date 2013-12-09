@@ -16,4 +16,13 @@ describe Player do
       should respond_to "#{accessor}="
     end
   end
+
+  it 'loads dummy names' do
+    Player::NAMES.should be_an Array
+  end
+
+  it 'picks the dummy names' do
+    Player.next_name.should == 'maradona'
+    Player.next_name.should == 'falcao'
+  end
 end

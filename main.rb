@@ -134,12 +134,12 @@ class Table
     serial = RfidReader.open do
       read_pins
       check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => :skip_registration do |pin|
-        PLAYERS.times { |n| send "player_#{n}=", Player.new(n.to_s) }
+        PLAYERS.times { |n| send "player_#{n}=", Player.new(name: dummy_player_name) }
         set_state :start_match
         return
       end
     end
-    send "#{player}=", Player.new(serial.reading)
+    send "#{player}=", Player.new(rfid: serial.reading)
     sound.play_player_registered
   end
 
@@ -238,6 +238,10 @@ class Table
 
   def say(text)
     @say_pid = fork { exec %(espeak "#{text}") }
+  end
+
+  def dummy_player_name
+    Player.next_name
   end
 end
 
