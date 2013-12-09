@@ -4,7 +4,7 @@ describe Team do
   let(:code) { :asdasd }
   let(:team) { Team.new(code) }
 
-  [:code, :score, :name, :players].each do |accessor|
+  [:code, :score, :players].each do |accessor|
     it "has '#{accessor}' reader" do
       team.should respond_to accessor
     end
