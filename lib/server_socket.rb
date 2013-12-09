@@ -58,7 +58,7 @@ class ServerSocket
     ws.onmessage do |msg, type|
       message = Message.new(msg, type)
       pong if message.ping?
-      table.set_state(:end_match) if message.match_closed?
+      table.close_match if message.match_closed?
     end
     ws.onclose { puts "[EM] disconnected #{URL}" }
   end

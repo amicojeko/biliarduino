@@ -7,8 +7,6 @@ Dir['lib/*.rb'].each do |file|
   require File.expand_path "../#{file}", __FILE__
 end
 
-$debug = true if ARGV.delete('-d')
-
 
 
 class Table
@@ -70,8 +68,6 @@ class Table
   end
 
   def set_state(state)
-    @__flushed = false
-    @started = false if state == :idle
     self.state = STATES[state]
   end
 
@@ -100,17 +96,12 @@ class Table
   end
 
   def wait_for_start
-    if state_idle? and !@started
-      debug_once 'idle - please push start button'
-      sound.play_idle_sound
-      @started = true
-    end
+    sound.play_once_idle_sound if state_idle?
   end
 
   def register_players
     if state_registration?
       clear_teams_and_players
-      debug 'register players'
       PLAYERS.times do |n|
         player = "player_#{n}"
         unless send(player)
@@ -135,7 +126,6 @@ class Table
   end
 
   def get_player(player)
-    debug "waiting for #{player}"
     serial = RfidReader.open do
       read_pins
       check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => :skip_registration do |pin|
@@ -144,7 +134,6 @@ class Table
         return
       end
     end
-    debug "#{player}: #{serial.reading}"
     send "#{player}=", Player.new(serial.reading)
     sound.play_player_registered
   end
@@ -187,8 +176,7 @@ class Table
       # true when state is missing (callback happens always), or is correct for this event
       if !opts[:on_state] or opts[:on_state] && send("state_#{opts[:on_state]}?")
         glock
-        debug opts[:message] || "#{pin} pressed"
-        play_sound opts[:sound] if opts[:sound]
+        sound.send "play_#{opts[:sound]}" if opts[:sound]
         yield pin if block_given?
       end
     end
@@ -232,27 +220,17 @@ class Table
     PLAYERS.times {|n| send "player_#{n}=", nil}
   end
 
-  def debug_once(message)
-    unless @__flushed
-      debug message
-      @__flushed = true
-    end
+  def close_match
+    set_state(:end_match)
+    sound.reset_sounds
   end
 
   private
-
-  def debug(message)
-    p message if $debug
-  end
 
   # FIXME prende un parametro, ma non viene usato
   def get_snapshot(team)
     camera = team.code
     fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam_#{Time.now.to_i}.jpg'"}
-  end
-
-  def play_sound(tune)
-    sound.play tune
   end
 
   def play_video(video)
