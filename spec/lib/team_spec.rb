@@ -33,7 +33,7 @@ describe Team do
   describe '#player_rfids' do
     it 'returns player rfids' do
       %w[123 456].each do |rfid|
-        team.add_player Player.new(rfid)
+        team.add_player Player.new(rfid: rfid)
       end
       team.player_rfids.should be_all { |id| %w[123 456].include? id }
     end

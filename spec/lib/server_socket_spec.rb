@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe ServerSocket do
   def build_teams
-    team_a = Team.new(:a, :players => [Player.new('1'), Player.new('2')])
-    team_b = Team.new(:b, :players => [Player.new('3'), Player.new('4')])
+    team_a = Team.new(:a, :players => [Player.new(rfid: 1), Player.new(rfid: 2)])
+    team_b = Team.new(:b, :players => [Player.new(rfid: 3), Player.new(rfid: 4)])
     [team_a, team_b]
   end
 

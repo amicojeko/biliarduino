@@ -1,18 +1,8 @@
 class Player
-  ROLES = [:defense, :attack]
+  attr_accessor :rfid, :name
 
-  attr_accessor :rfid, :role, :name
-
-
-  def initialize(rfid, role=:defense)
-    @rfid = rfid
-    @role = role
-    validate_role
-  end
-
-  private
-
-  def validate_role
-    raise "player role #{role} is invalid" unless ROLES.include? role
+  def initialize(opts)
+    @rfid = opts[:rfid]
+    @name = opts[:name]
   end
 end
