@@ -30,12 +30,18 @@ describe Team do
     end
   end
 
-  describe '#player_rfids' do
-    it 'returns player rfids' do
-      %w[123 456].each do |rfid|
-        team.add_player Player.new(rfid: rfid)
+  describe '#players_as_json' do
+    context 'when players are real players' do
+      it 'has expected values' do
+        team.add_player Player.new(rfid: code)
+        team.players_as_json.map {|arr| arr.values.should =~ ['Player', code]}
       end
-      team.player_rfids.should be_all { |id| %w[123 456].include? id }
+    end
+    context 'when players are dummy players' do
+      it 'has expected values' do
+        team.add_player DummyPlayer.new
+        team.players_as_json.map {|arr| arr.values.should include 'DummyPlayer'}
+      end
     end
   end
 end

@@ -10,7 +10,7 @@ class Team
     self.players << player
   end
 
-  def player_rfids
-    players.map { |p| p.rfid }
+  def players_as_json
+    players.map { |p| p.as_json }
   end
 end
