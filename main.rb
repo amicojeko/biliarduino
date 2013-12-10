@@ -139,7 +139,7 @@ class Table
         return
       end
     end
-    send "#{player}=", Player.new(rfid: serial.reading)
+    send "#{player}=", RegisteredPlayer.new(rfid: serial.reading)
     sound.play_player_registered
   end
 

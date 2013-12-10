@@ -1,5 +1,5 @@
 require 'yaml'
-require_relative 'player'
+require_relative 'registered_player'
 
 class DummyPlayer < Player
   NAMES = YAML.load_file(File.expand_path 'config/dummy_players.yml')
