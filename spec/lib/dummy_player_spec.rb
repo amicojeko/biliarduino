@@ -16,7 +16,7 @@ describe DummyPlayer do
   describe '#as_json' do
     it 'picks the name' do
       subject.stub name: 'maradona'
-      subject.as_json.should == {name: 'maradona'}
+      subject.as_json.should == {name: 'maradona', type: 'DummyPlayer'}
     end
   end
 end

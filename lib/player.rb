@@ -6,6 +6,6 @@ class Player
   end
 
   def as_json(opts={})
-    {rfid: rfid }
+    {rfid: rfid, type: self.class.name }
   end
 end

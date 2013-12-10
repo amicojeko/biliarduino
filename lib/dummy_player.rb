@@ -24,6 +24,6 @@ class DummyPlayer < Player
   end
 
   def as_json(opts={})
-    {name: name}
+    {name: name, type: self.class.name}
   end
 end

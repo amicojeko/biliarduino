@@ -18,6 +18,6 @@ describe Player do
   end
 
   it '#as_json picks the rfid' do
-    subject.as_json.should == {rfid: '123456789012'}
+    subject.as_json.should == {rfid: '123456789012', type: 'Player'}
   end
 end
