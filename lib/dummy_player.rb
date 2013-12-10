@@ -4,7 +4,7 @@ require_relative 'registered_player'
 class DummyPlayer < Player
   NAMES = YAML.load_file(File.expand_path 'config/dummy_players.yml')
 
-  attr_accessor :name
+  attr_accessor :twitter_name
 
   class << self
     attr_accessor :name_index
@@ -20,10 +20,10 @@ class DummyPlayer < Player
 
 
   def initialize
-    @name = self.class.next_name
+    @twitter_name = self.class.next_name
   end
 
   def as_json(opts={})
-    {name: name, type: self.class.name}
+    {twitter_name: twitter_name, type: self.class.name}
   end
 end
