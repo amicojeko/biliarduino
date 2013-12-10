@@ -25,4 +25,22 @@ describe Player do
     Player.next_name.should == 'maradona'
     Player.next_name.should == 'falcao'
   end
+
+  describe '#as_json' do
+    context 'when player has rfid' do
+      before { subject.stub name: nil }
+
+      it 'picks the rfid' do
+        subject.as_json.should == {rfid: '123456789012'}
+      end
+    end
+
+    context 'when player has name' do
+      before { subject.stub rfid: nil }
+
+      it 'picks the name' do
+        subject.as_json.should == {name: 'maradona'}
+      end
+    end
+  end
 end

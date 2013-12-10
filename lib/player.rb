@@ -20,4 +20,8 @@ class Player
     @rfid = opts[:rfid]
     @name = opts[:name]
   end
+
+  def as_json(opts={})
+    rfid ? {rfid: rfid } : {name: name}
+  end
 end
