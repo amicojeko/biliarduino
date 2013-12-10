@@ -134,7 +134,7 @@ class Table
     serial = RfidReader.open do
       read_pins
       check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => :skip_registration do |pin|
-        PLAYERS.times { |n| send "player_#{n}=", Player.new(name: dummy_player_name) }
+        PLAYERS.times { |n| send "player_#{n}=", DummyPlayer.new }
         set_state :start_match
         return
       end
@@ -238,10 +238,6 @@ class Table
 
   def say(text)
     @say_pid = fork { exec %(espeak "#{text}") }
-  end
-
-  def dummy_player_name
-    Player.next_name
   end
 end
 
