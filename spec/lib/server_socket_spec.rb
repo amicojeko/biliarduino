@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ServerSocket do
   def build_teams
     team_a = Team.new(:a, :players => [Player.new(rfid: 1), Player.new(rfid: 2)])
-    team_b = Team.new(:b, :players => [Player.new(rfid: 3), Player.new(rfid: 4)])
+    team_b = Team.new(:b, :players => [DummyPlayer.new, DummyPlayer.new])
     [team_a, team_b]
   end
 
@@ -21,6 +21,14 @@ describe ServerSocket do
       json = subject.start_match_json(build_teams)
       %w["player_1": "player_2": "player_3": "player_4":].each do |key|
         json.should include key
+      end
+    end
+
+    it 'includes the player type' do
+      json = subject.start_match_json(build_teams)
+      %w["player_1": "player_2": "player_3": "player_4":].each do |key|
+        json.should include '"type":"Player"'
+        json.should include '"type":"DummyPlayer"'
       end
     end
   end
