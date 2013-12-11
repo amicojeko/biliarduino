@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe Player do
+describe RegisteredPlayer do
   let(:opts) { {rfid: '123456789012'} }
 
-  subject { Player.new(opts) }
+  subject { RegisteredPlayer.new(opts) }
 
-  it { should be_a Player }
+  it { should be_a RegisteredPlayer }
 
   [:rfid].each do |accessor|
     it "should have '#{accessor}' reader" do
@@ -18,6 +18,6 @@ describe Player do
   end
 
   it '#as_json picks the rfid' do
-    subject.as_json.should == {rfid: '123456789012', type: 'Player'}
+    subject.as_json.should == {rfid: '123456789012', type: 'RegisteredPlayer'}
   end
 end

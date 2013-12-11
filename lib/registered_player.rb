@@ -1,4 +1,4 @@
-class Player
+class RegisteredPlayer
   attr_accessor :rfid
 
   def initialize(opts)

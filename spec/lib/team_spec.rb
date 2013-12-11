@@ -33,8 +33,8 @@ describe Team do
   describe '#players_as_json' do
     context 'when players are real players' do
       it 'has expected values' do
-        team.add_player Player.new(rfid: code)
-        team.players_as_json.map {|arr| arr.values.should =~ ['Player', code]}
+        team.add_player RegisteredPlayer.new(rfid: code)
+        team.players_as_json.map {|arr| arr.values.should =~ ['RegisteredPlayer', code]}
       end
     end
     context 'when players are dummy players' do

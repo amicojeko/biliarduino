@@ -1,7 +1,6 @@
 require 'yaml'
-require_relative 'registered_player'
 
-class DummyPlayer < Player
+class DummyPlayer
   NAMES = YAML.load_file(File.expand_path 'config/dummy_players.yml')
 
   attr_accessor :twitter_name
