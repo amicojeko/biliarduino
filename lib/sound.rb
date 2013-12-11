@@ -1,13 +1,13 @@
 require 'omxplayer'
 
 class Sound
-  IDLE_SOUND        = {:name => 'media/idle.wav'         , :duration => 2}
-  START_SOUND       = {:name => 'media/fischio2.wav'     , :duration => 1}
-  REGISTER_SOUND    = {:name => 'media/register.wav'     , :duration => 2}
-  MATCH_START       = {:name => 'media/match_start.wav'  , :duration => 1}
-  MATCH_END         = {:name => 'media/fischiofine.wav'  , :duration => 1}
-  PLAYER_REGISTERED = {:name => 'media/beep-7.wav',        :duration => 1}
-  SKIP_REGISTRATION = {:name => 'media/fischio2.wav',      :duration => 1}
+  IDLE_SOUND        = {name: 'media/idle.wav'         , duration: 2}
+  START_SOUND       = {name: 'media/fischio2.wav'     , duration: 1}
+  REGISTER_SOUND    = {name: 'media/register.wav'     , duration: 2}
+  MATCH_START       = {name: 'media/match_start.wav'  , duration: 1}
+  MATCH_END         = {name: 'media/fischiofine.wav'  , duration: 1}
+  PLAYER_REGISTERED = {name: 'media/beep-7.wav',        duration: 1}
+  SKIP_REGISTRATION = {name: 'media/fischio2.wav',      duration: 1}
 
 
   attr_reader :omx, :goal, :supporters, :music, :played
@@ -106,7 +106,7 @@ class Sound
 
   def play_sound(sound)
     stop_sound
-    sound = {:name => sound, :duration => 2} if sound.is_a?(String)
+    sound = {name: sound, duration: 2} if sound.is_a?(String)
     omx.open sound[:name]
     sleep sound[:duration]
   end

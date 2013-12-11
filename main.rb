@@ -15,12 +15,12 @@ class Table
   GOAL_DELAY   = 3
   DELAY        = 0.002
   OUTPUT_PINS  = {led: 7} # TODO the only output pin used now is for debugging glocked input state
-  LED_STATES   = {:on => 1, :off => 0}
+  LED_STATES   = {on: 1, off: 0}
   STATES       = {idle: 0, registration: 1, start_match: 2, match: 3, end_match: 4}
   INPUT_PINS   = {
-    goal_a: InputPin.new(0, :pressed_value => 1, :lock_timeframe => GOAL_DELAY),
-    goal_b: InputPin.new(3, :pressed_value => 1, :lock_timeframe => GOAL_DELAY),
-    start:  InputPin.new(4, :pressed_value => 0) # no locking here
+    goal_a: InputPin.new(0, pressed_value: 1, lock_timeframe: GOAL_DELAY),
+    goal_b: InputPin.new(3, pressed_value: 1, lock_timeframe: GOAL_DELAY),
+    start:  InputPin.new(4, pressed_value: 0) # no locking here
   }
 
 
@@ -79,18 +79,18 @@ class Table
   private
 
   def check_input_pins
-    check_pressed INPUT_PINS[:start], :message => 'match begins now', :sound => :start_sound, :on_state => :idle do |pin|
+    check_pressed INPUT_PINS[:start], message: 'match begins now', sound: :start_sound, on_state: :idle do |pin|
       set_state :registration
       unglock
     end
-    check_pressed INPUT_PINS[:goal_a], :message => 'goal team a', :on_state => :match do |pin|
+    check_pressed INPUT_PINS[:goal_a], message: 'goal team a', on_state: :match do |pin|
       unless pin.locked?
         sound.play_random_goal
         socket.update_score :a
         pin.lock
       end
     end
-    check_pressed INPUT_PINS[:goal_b], :message => 'goal team b', :on_state => :match do |pin|
+    check_pressed INPUT_PINS[:goal_b], message: 'goal team b', on_state: :match do |pin|
       unless pin.locked?
         sound.play_random_goal
         socket.update_score :b
@@ -133,7 +133,7 @@ class Table
   def get_player(player)
     serial = RfidReader.open do
       read_pins
-      check_pressed INPUT_PINS[:start], :message => "skipping registration for #{player}", :sound => :skip_registration do |pin|
+      check_pressed INPUT_PINS[:start], message: "skipping registration for #{player}", sound: :skip_registration do |pin|
         PLAYERS.times { |n| send "player_#{n}=", DummyPlayer.new }
         set_state :start_match
         return
