@@ -32,9 +32,9 @@ class Table
 
 
   def initialize
-    @gpio   = WiringPi::GPIO.new(WPI_MODE_PINS)
-    @sound  = Sound.new
-    @teams  = []
+    @gpio  = WiringPi::GPIO.new(WPI_MODE_PINS)
+    @sound = Sound.new
+    @teams = []
     init_inputs
     init_outputs
     unglock
@@ -73,7 +73,7 @@ class Table
 
   def close_match
     set_state(:end_match)
-    sound.reset_sounds
+    # sound.reset_sounds
   end
 
   private
