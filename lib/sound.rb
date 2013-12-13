@@ -5,7 +5,7 @@ class Sound
   START_SOUND       = {name: 'media/fischio2.wav'     , duration: 1}
   REGISTER_SOUND    = {name: 'media/register.wav'     , duration: 2}
   MATCH_START       = {name: 'media/match_start.wav'  , duration: 1}
-  MATCH_END         = {name: 'media/fischiofine.wav'  , duration: 1}
+  MATCH_END         = {name: 'media/fischiofine.wav'  , duration: 3}
   PLAYER_REGISTERED = {name: 'media/beep-7.wav',        duration: 1}
   SKIP_REGISTRATION = {name: 'media/fischio2.wav',      duration: 1}
 

@@ -149,7 +149,6 @@ class Table
       set_state :match
       socket.start_match(teams)
       sound.play_match_start
-      sleep 0.5
       sound.play_background_supporters
     end
   end
