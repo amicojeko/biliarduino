@@ -43,46 +43,8 @@ class Sound
     end
   end
 
-  # TODO this can be dried up... before that, check what sound constants are really used and delete the unnecessary ones
-  # def play_once_idle_sound
-  #   return if played_once[:idle_sound]
-  #   played[:idle_sound] = true
-  #   play_idle_sound
-  # end
-
-  # def reset_idle_sound
-  #   played.delete :idle_sound
-  # end
-
-  # def play_skip_registration
-  #   play_sound SKIP_REGISTRATION
-  # end
-
-  # def play_start_sound
-  #   play_sound START_SOUND
-  # end
-
-  # def play_idle_sound
-  #   play_sound IDLE_SOUND
-  # end
-
-  # def play_register_sound
-  #   play_sound REGISTER_SOUND
-  # end
-
-  # def play_player_registered
-  #   play_sound PLAYER_REGISTERED
-  # end
-  # def play_match_start
-  #   play_sound MATCH_START
-  # end
-
-  # def play_match_end
-  #   play_sound MATCH_END
-  # end
-
   def play_random_goal
-    play_sound goal.sample
+    play_sound name: goal.sample, duration: 5
     play_background_supporters
   end
 
