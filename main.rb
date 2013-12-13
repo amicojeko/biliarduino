@@ -107,6 +107,7 @@ class Table
   def register_players
     if state_registration?
       clear_teams_and_players
+      sound.play_register_sound
       PLAYERS.times do |n|
         player = "player_#{n}"
         unless send(player)
