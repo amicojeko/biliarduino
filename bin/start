@@ -11,7 +11,7 @@ cd $G_DIR
 touch app.log
 $RVM $BUNDLE exec $RUBY app.rb -p80 -o0.0.0.0 & 2>&1 > app.log
 
-sleep 30 # give time to sinatra app to start
+sleep 120 # give time to sinatra app to start
 
 cd $B_DIR
 [ -f fifo ] || mkfifo fifo
