@@ -6,10 +6,11 @@ BUNDLE=/home/pi/.rvm/gems/ruby-2.0.0-p247@global/bin/bundle
 B_DIR=/home/pi/ruby/biliarduino
 G_DIR=/home/pi/ruby/glue
 
-
+export rvmsudo_secure_path=1
 cd $G_DIR
-touch app.log
-$RVM $BUNDLE exec $RUBY app.rb -p80 -o0.0.0.0 & 2>&1 > app.log
+touch log/app.log
+sudo chmod 777 log/app.log
+$RVM $RUBY app.rb -p80 -o0.0.0.0 & 2>&1 > log/app.log
 
 sleep 120 # give time to sinatra app to start
 
