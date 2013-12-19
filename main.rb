@@ -44,7 +44,7 @@ class Table
     EM.run do
       @socket = ServerSocket.new(self)
       EM.add_periodic_timer DELAY, &method(:mainloop)
-      EM.add_periodic_timer(3) { play_background_supporters }
+      # EM.add_periodic_timer(3) { play_background_supporters }
     end
   end
 
