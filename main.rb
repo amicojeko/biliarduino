@@ -44,6 +44,7 @@ class Table
     EM.run do
       @socket = ServerSocket.new(self)
       EM.add_periodic_timer DELAY, &method(:mainloop)
+      EM.add_periodic_timer(3) { play_background_supporters }
     end
   end
 
@@ -155,6 +156,7 @@ class Table
 
   def end_match
     if state_end_match?
+      sound.stop_supporters
       sound.play_match_end
       set_state :idle
     end
@@ -225,19 +227,8 @@ class Table
     PLAYERS.times {|n| send "player_#{n}=", nil}
   end
 
-  # FIXME prende un parametro, ma non viene usato
-  def get_snapshot(team)
-    camera = team.code
-    fork { exec "fswebcam -r 640x480 -d /dev/video0 'snapshots/webcam_#{Time.now.to_i}.jpg'"}
-  end
-
-  def play_video(video)
-    # TODO temporarily disabled
-    # @video_pid = fork { exec 'bin/play_media ' + video }
-  end
-
-  def say(text)
-    @say_pid = fork { exec %(espeak "#{text}") }
+  def play_background_supporters
+    sound.play_background_supporters if state_match?
   end
 end
 
