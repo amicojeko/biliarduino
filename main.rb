@@ -86,15 +86,15 @@ class Table
     end
     check_pressed INPUT_PINS[:goal_a], message: 'goal team a', on_state: :match do |pin|
       unless pin.locked?
-        sound.play_random_goal
         socket.update_score :a
+        sound.play_random_goal
         pin.lock
       end
     end
     check_pressed INPUT_PINS[:goal_b], message: 'goal team b', on_state: :match do |pin|
       unless pin.locked?
-        sound.play_random_goal
         socket.update_score :b
+        sound.play_random_goal
         pin.lock
       end
     end
