@@ -10,7 +10,7 @@ export rvmsudo_secure_path=1
 cd $G_DIR
 touch log/app.log
 sudo chmod 777 log/app.log
-$RVM $RUBY app.rb -p80 -o0.0.0.0 & 2>&1 > log/app.log
+LOG=true $RVM $RUBY app.rb -p80 -o0.0.0.0 & 2>&1 > log/app.log
 
 sleep 120 # give time to sinatra app to start
 
