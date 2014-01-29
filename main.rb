@@ -156,6 +156,7 @@ class Table
 
   def end_match
     if state_end_match?
+      sound.stop_supporters
       sound.play_match_end
       set_state :idle
     end
